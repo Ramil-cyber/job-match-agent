@@ -1,0 +1,18 @@
+# Virtual environment
+.venv/
+
+# API keys
+.env
+
+# Private resumes and job descriptions
+data/
+
+# Generated reports
+outputs/
+
+# Python temporary files
+__pycache__/
+*.pyc
+
+# macOS files
+.DS_Store
