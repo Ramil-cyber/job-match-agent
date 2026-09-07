@@ -91,22 +91,26 @@ Create the complete report and save it using save_job_match_report.
 
 
 async def main() -> None:
-    """Load the files, run the agent, and display its final confirmation."""
+    """Load the files, run the agent, and display the result."""
 
-    resume = read_text_file(RESUME_PATH)
-    job_description = read_text_file(JOB_DESCRIPTION_PATH)
+    try:
+        resume = read_text_file(RESUME_PATH)
+        job_description = read_text_file(JOB_DESCRIPTION_PATH)
 
-    analysis_request = build_analysis_request(
-        resume=resume,
-        job_description=job_description,
-    )
+        analysis_request = build_analysis_request(
+            resume=resume,
+            job_description=job_description,
+        )
 
-    result = await Runner.run(
-        job_match_agent,
-        analysis_request,
-    )
+        result = await Runner.run(
+            job_match_agent,
+            analysis_request,
+        )
 
-    print(result.final_output)
+        print(result.final_output)
+
+    except (FileNotFoundError, ValueError) as error:
+        print(f"Input error: {error}")
 
 
 if __name__ == "__main__":
