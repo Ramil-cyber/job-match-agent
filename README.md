@@ -73,3 +73,23 @@ The first version is complete when:
 - It handles missing files with a clear error message
 - It does not invent resume information
 - It works with at least five different job descriptions
+
+## Project Structure
+
+- `app.py` — loads the inputs and runs the Job Match Agent.
+- `agent_tools.py` — provides the tool that saves the completed report.
+- `file_utils.py` — contains reusable functions for reading and writing files.
+- `quality_check.py` — checks the saved report for required content.
+- `requirements.txt` — lists the Python packages required by the project.
+- `data/` — contains the resume and job description.
+- `outputs/` — contains generated reports.
+- `.env` — stores the private OpenAI API key and is excluded from Git.
+
+## How to Run
+
+1. Open the project folder in VS Code.
+2. Open the VS Code terminal.
+3. Activate the virtual environment:
+
+   ```bash
+   source .venv/bin/activate
