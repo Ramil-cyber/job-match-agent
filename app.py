@@ -1,5 +1,7 @@
+import argparse
 import asyncio
 import os
+from pathlib import Path
 
 from agents import Agent, Runner
 from dotenv import load_dotenv
@@ -19,6 +21,39 @@ if not os.getenv("OPENAI_API_KEY"):
 # Define the locations of the input files.
 RESUME_PATH = PROJECT_ROOT / "data" / "resume.txt"
 JOB_DESCRIPTION_PATH = PROJECT_ROOT / "data" / "job_description.txt"
+
+
+def parse_arguments() -> argparse.Namespace:
+    """Read optional file paths provided in the terminal."""
+
+    parser = argparse.ArgumentParser(
+        description="Compare a resume with a job description."
+    )
+
+    parser.add_argument(
+        "--resume",
+        type=Path,
+        default=RESUME_PATH,
+        help="Path to the resume text file.",
+    )
+
+    parser.add_argument(
+        "--job-description",
+        type=Path,
+        default=JOB_DESCRIPTION_PATH,
+        help="Path to the job-description text file.",
+    )
+
+    return parser.parse_args()
+
+
+def resolve_input_path(file_path: Path) -> Path:
+    """Convert a relative input path into a full project path."""
+
+    if file_path.is_absolute():
+        return file_path
+
+    return PROJECT_ROOT / file_path
 
 
 # Define the agent's behavior, rules, and available tools.
@@ -91,11 +126,16 @@ Create the complete report and save it using save_job_match_report.
 
 
 async def main() -> None:
-    """Load the files, run the agent, and display the result."""
+    """Load the selected files, run the agent, and display the result."""
+
+    args = parse_arguments()
+
+    resume_path = resolve_input_path(args.resume)
+    job_description_path = resolve_input_path(args.job_description)
 
     try:
-        resume = read_text_file(RESUME_PATH)
-        job_description = read_text_file(JOB_DESCRIPTION_PATH)
+        resume = read_text_file(resume_path)
+        job_description = read_text_file(job_description_path)
 
         analysis_request = build_analysis_request(
             resume=resume,

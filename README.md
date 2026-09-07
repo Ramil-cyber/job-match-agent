@@ -93,3 +93,31 @@ The first version is complete when:
 
    ```bash
    source .venv/bin/activate
+   ```
+
+## Using Different Input Files
+
+By default, the application uses:
+
+- `data/resume.txt`
+- `data/job_description.txt`
+
+You can select different input files with the `--resume` and
+`--job-description` options:
+
+```bash
+python app.py --resume data/resume.txt --job-description data/another_job_description.txt
+```
+
+To see all available options without running the agent:
+
+```bash
+python app.py --help
+```
+
+Each successful run saves the generated report to:
+
+```text
+outputs/job_match_report.md
+```
+
