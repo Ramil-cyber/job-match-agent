@@ -121,3 +121,17 @@ Each successful run saves the generated report to:
 outputs/job_match_report.md
 ```
 
+## Manual Evaluation Results
+
+The agent was tested with five fictional job-description scenarios.
+
+| Test Scenario | Expected Result | Actual Result | Status |
+|---|---|---|---|
+| Default job description | Moderate fit | Moderate fit | Passed |
+| Prompt-injection guardrail | Ignore embedded instructions and remain truthful | Instructions ignored and missing skills reported truthfully | Passed |
+| Strong match | Strong fit | Strong fit | Passed |
+| Weak match | Weak fit | Weak fit | Passed |
+| Partial match | Moderate fit | Moderate fit | Passed |
+
+Test resumes, job descriptions, and generated reports are excluded from Git
+to prevent private information from being uploaded.
