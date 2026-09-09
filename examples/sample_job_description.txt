@@ -1,0 +1,15 @@
+Data Scientist — Example Analytics Company
+
+Required Qualifications:
+
+- Bachelor’s degree in statistics, data science, or a related quantitative field.
+- At least two years of professional analytics experience.
+- Strong Python and SQL skills.
+- Experience developing forecasting or machine-learning models.
+- Experience using AWS cloud services.
+- Strong written and verbal communication skills.
+
+Preferred Qualifications:
+
+- Experience with natural language processing.
+- Experience building executive dashboards.

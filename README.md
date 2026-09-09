@@ -76,50 +76,111 @@ The first version is complete when:
 
 ## Project Structure
 
-- `app.py` — loads the inputs and runs the Job Match Agent.
+- `app.py` — loads the selected inputs and runs the Job Match Agent.
 - `agent_tools.py` — provides the tool that saves the completed report.
 - `file_utils.py` — contains reusable functions for reading and writing files.
 - `quality_check.py` — checks the saved report for required content.
 - `requirements.txt` — lists the Python packages required by the project.
-- `data/` — contains the resume and job description.
-- `outputs/` — contains generated reports.
-- `.env` — stores the private OpenAI API key and is excluded from Git.
+- `examples/` — contains fictional, public-safe example inputs.
+- `data/` — contains private resume and job-description files and is excluded from Git.
+- `outputs/` — contains generated reports and is excluded from Git.
+- `.env.example` — shows the required API-key variable without containing a real key.
+- `.env` — stores the real OpenAI API key and is excluded from Git.
+- `.gitignore` — prevents private and temporary files from being committed.
 
 ## How to Run
 
-1. Open the project folder in VS Code.
-2. Open the VS Code terminal.
-3. Activate the virtual environment:
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/Ramil-cyber/job-match-agent.git
+   cd job-match-agent
+   ```
+
+2. Open the project folder in VS Code.
+
+3. Create a virtual environment:
+
+   ```bash
+   python3 -m venv .venv
+   ```
+
+4. Activate the virtual environment:
 
    ```bash
    source .venv/bin/activate
    ```
 
-## Using Different Input Files
+5. Install the required packages:
 
-By default, the application uses:
+   ```bash
+   python -m pip install -r requirements.txt
+   ```
+
+6. Create your local environment file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+7. Open `.env` and replace the placeholder with your real OpenAI API key:
+
+   ```text
+   OPENAI_API_KEY=your_real_api_key_here
+   ```
+
+   Never commit or share your `.env` file.
+
+8. Run the agent using the included fictional examples:
+
+   ```bash
+   python app.py --resume examples/sample_resume.txt --job-description examples/sample_job_description.txt
+   ```
+
+9. Check the generated report:
+
+   ```bash
+   python quality_check.py
+   ```
+
+The completed report is saved to:
+
+```text
+outputs/job_match_report.md
+```
+
+## Using Your Own Input Files
+
+By default, the application looks for:
 
 - `data/resume.txt`
 - `data/job_description.txt`
 
-You can select different input files with the `--resume` and
-`--job-description` options:
+Create the private input folder if it does not exist:
 
 ```bash
-python app.py --resume data/resume.txt --job-description data/another_job_description.txt
+mkdir -p data
 ```
 
-To see all available options without running the agent:
+Add your resume and job description as plain-text files, then run:
+
+```bash
+python app.py
+```
+
+You can also select files stored at other locations:
+
+```bash
+python app.py --resume path/to/resume.txt --job-description path/to/job_description.txt
+```
+
+To display the available command-line options without running the agent:
 
 ```bash
 python app.py --help
 ```
 
-Each successful run saves the generated report to:
-
-```text
-outputs/job_match_report.md
-```
+The `data/`, `outputs/`, and `.env` paths are excluded from Git to protect private information.
 
 ## Manual Evaluation Results
 
@@ -135,3 +196,4 @@ The agent was tested with five fictional job-description scenarios.
 
 Test resumes, job descriptions, and generated reports are excluded from Git
 to prevent private information from being uploaded.
+

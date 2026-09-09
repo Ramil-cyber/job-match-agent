@@ -1,0 +1,23 @@
+Jordan Lee
+Fictional Sample Candidate
+
+Professional Summary
+
+Data analyst with three years of experience using data to improve retail reporting and forecasting.
+
+Education
+
+Bachelor of Science in Statistics
+
+Professional Experience
+
+Data Analyst, Northstar Retail | 2023–2026
+
+- Built SQL data pipelines for weekly sales reporting.
+- Developed a Python forecasting model that reduced forecast error by 12%.
+- Created Tableau dashboards used by sales managers.
+- Presented analytical findings to technical and nontechnical stakeholders.
+
+Skills
+
+Python, SQL, Tableau, forecasting, data visualization
