@@ -19,6 +19,11 @@ The agent will create:
 
 - `outputs/job_match_report.md`
 
+Generated reports in `outputs/` remain local and are excluded from Git.
+
+You can view a [fictional sample report](examples/sample_job_match_report.md)
+without running the application.
+
 The report will contain:
 
 1. A short fit summary
