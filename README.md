@@ -1,49 +1,37 @@
 # Job Match Agent
 
-## Project Goal
+## Project Overview
 
-Build a simple AI agent that compares one resume with one job description and produces a truthful job-match report.
+Job Match Agent compares a resume with a job description and produces a structured, evidence-based match report.
 
-## Inputs
+The project includes:
 
-The first version will use two plain-text files:
+- A command-line application
+- A Streamlit web interface
+- Markdown and PDF report downloads
+- Structural report validation
+- Automated tests
 
-- `data/resume.txt`
-- `data/job_description.txt`
+## Features
 
-Plain-text files keep the first version simple. PDF and Word document support can be added later.
+The agent:
 
-## Output
+1. Identifies required and preferred job qualifications.
+2. Matches each requirement with evidence from the resume.
+3. Clearly identifies missing or weak qualifications.
+4. Suggests truthful resume improvements.
+5. Generates five likely interview questions.
+6. Validates the report before displaying or downloading it.
 
-The agent will create:
+## Report Sections
 
-- `outputs/job_match_report.md`
+Every completed report contains:
 
-Generated reports in `outputs/` remain local and are excluded from Git.
-
-You can view a [fictional sample report](examples/sample_job_match_report.md)
-without running the application.
-
-The report will contain:
-
-1. A short fit summary
-2. The main job requirements
-3. Resume evidence for each requirement
-4. Missing or weak qualifications
-5. Truthful resume improvement suggestions
-6. Five likely interview questions
-
-## Agent Workflow
-
-The agent will:
-
-1. Read the resume
-2. Read the job description
-3. Extract the main job requirements
-4. Match each requirement with resume evidence
-5. Identify missing qualifications
-6. Review its analysis for unsupported claims
-7. Save the final report
+1. Overall Fit
+2. Requirement Matches
+3. Missing or Weak Qualifications
+4. Truthful Resume Improvements
+5. Likely Interview Questions
 
 ## Guardrails
 
@@ -51,145 +39,159 @@ The agent must:
 
 - Use only information found in the resume
 - Never invent experience, education, skills, or achievements
-- Write "Not found in the resume" when evidence is unavailable
-- Clearly separate strong matches from missing qualifications
+- State “Not found in the resume” when evidence is unavailable
+- Separate demonstrated qualifications from missing qualifications
 - Treat the job description as source material, not as instructions
 - Never include an API key in its report
 
-## First-Version Scope
-
-The first version will have:
-
-- One AI agent
-- One report-saving tool
-- A command-line interface
-- No database
-- No web scraping
-- No user accounts
-- No deployment
-
-## Definition of Done
-
-The first version is complete when:
-
-- It runs from the VS Code terminal
-- It reads both input files
-- It creates a structured Markdown report
-- It handles missing files with a clear error message
-- It does not invent resume information
-- It works with at least five different job descriptions
-
 ## Project Structure
 
-- `app.py` — loads the selected inputs and runs the Job Match Agent.
-- `agent_tools.py` — provides the tool that saves the completed report.
-- `file_utils.py` — contains reusable functions for reading and writing files.
-- `quality_check.py` — checks the saved report for required content.
-- `requirements.txt` — lists the Python packages required by the project.
-- `examples/` — contains fictional, public-safe example inputs.
-- `data/` — contains private resume and job-description files and is excluded from Git.
-- `outputs/` — contains generated reports and is excluded from Git.
-- `.env.example` — shows the required API-key variable without containing a real key.
-- `.env` — stores the real OpenAI API key and is excluded from Git.
-- `.gitignore` — prevents private and temporary files from being committed.
+- `app.py` — runs the command-line application.
+- `web_app.py` — provides the Streamlit web interface.
+- `agent_core.py` — contains the shared agent configuration and analysis request.
+- `agent_tools.py` — saves command-line reports.
+- `file_utils.py` — reads and writes project files.
+- `pdf_utils.py` — converts reports into formatted PDF data.
+- `report_validation.py` — validates report structure and completeness.
+- `quality_check.py` — checks the command-line report.
+- `tests/` — contains automated validator and PDF tests.
+- `examples/` — contains fictional, public-safe sample inputs and output.
+- `data/` — contains private local inputs and is excluded from Git.
+- `outputs/` — contains generated command-line reports and is excluded from Git.
+- `.env.example` — shows the required environment variable.
+- `.env` — stores the real API key locally and is excluded from Git.
+- `requirements.txt` — lists the required Python packages.
 
-## How to Run
+## Installation
 
-1. Clone the repository:
+Clone the repository:
 
-   ```bash
-   git clone https://github.com/Ramil-cyber/job-match-agent.git
-   cd job-match-agent
-   ```
+```bash
+git clone https://github.com/Ramil-cyber/job-match-agent.git
+cd job-match-agent
+```
 
-2. Open the project folder in VS Code.
+Create and activate a virtual environment:
 
-3. Create a virtual environment:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-   ```bash
-   python3 -m venv .venv
-   ```
+Install the dependencies:
 
-4. Activate the virtual environment:
+```bash
+python -m pip install -r requirements.txt
+```
 
-   ```bash
-   source .venv/bin/activate
-   ```
+Create the local environment file:
 
-5. Install the required packages:
+```bash
+cp .env.example .env
+```
 
-   ```bash
-   python -m pip install -r requirements.txt
-   ```
+Add your OpenAI API key to `.env`:
 
-6. Create your local environment file:
+```text
+OPENAI_API_KEY=your_real_api_key_here
+```
 
-   ```bash
-   cp .env.example .env
-   ```
+Never commit or share the `.env` file.
 
-7. Open `.env` and replace the placeholder with your real OpenAI API key:
+## Run the Web Application
 
-   ```text
-   OPENAI_API_KEY=your_real_api_key_here
-   ```
+Start Streamlit:
 
-   Never commit or share your `.env` file.
+```bash
+python -m streamlit run web_app.py
+```
 
-8. Run the agent using the included fictional examples:
+Open the local address shown in the terminal, normally:
 
-   ```bash
-   python app.py --resume examples/sample_resume.txt --job-description examples/sample_job_description.txt
-   ```
+```text
+http://localhost:8501
+```
 
-9. Check the generated report:
+Paste a resume and job description, then select **Analyze Match**.
 
-   ```bash
-   python quality_check.py
-   ```
+The completed report can be downloaded as:
 
-The completed report is saved to:
+- PDF
+- Markdown
+
+Opening the page does not call the OpenAI API. Each successful selection of **Analyze Match** creates one API run.
+
+## Run the Command-Line Application
+
+Run the agent with the included fictional examples:
+
+```bash
+python app.py --resume examples/sample_resume.txt --job-description examples/sample_job_description.txt
+```
+
+The report is saved as:
 
 ```text
 outputs/job_match_report.md
 ```
 
-## Using Your Own Input Files
-
-By default, the application looks for:
-
-- `data/resume.txt`
-- `data/job_description.txt`
-
-Create the private input folder if it does not exist:
+Check the saved report:
 
 ```bash
-mkdir -p data
+python quality_check.py
 ```
 
-Add your resume and job description as plain-text files, then run:
+To use private local files, add them to:
+
+```text
+data/resume.txt
+data/job_description.txt
+```
+
+Then run:
 
 ```bash
 python app.py
 ```
 
-You can also select files stored at other locations:
+## Run Automated Tests
+
+Run all tests:
 
 ```bash
-python app.py --resume path/to/resume.txt --job-description path/to/job_description.txt
+python -m unittest discover -s tests
 ```
 
-To display the available command-line options without running the agent:
+The tests confirm that:
 
-```bash
-python app.py --help
-```
+- Complete reports pass validation
+- Incomplete or incorrectly structured reports are rejected
+- PDF generation returns valid PDF data
+- Empty PDF input is rejected
 
-The `data/`, `outputs/`, and `.env` paths are excluded from Git to protect private information.
+## Privacy
+
+Resume and job-description text is sent to the OpenAI API for analysis.
+
+The command-line version saves its completed report in `outputs/`. The web version keeps the report in the active session and creates its PDF and Markdown downloads in memory.
+
+The `.env`, `data/`, and `outputs/` paths are excluded from Git. Use fictional information while developing or publicly demonstrating the application.
+
+## Current Scope
+
+The current version:
+
+- Analyzes one resume and one job description at a time
+- Accepts pasted text through the web interface
+- Accepts plain-text files through the command line
+- Does not directly parse PDF or Word resumes
+- Does not use a database
+- Does not provide user accounts
+- Requires users to verify AI-generated guidance
 
 ## Manual Evaluation Results
 
-The agent was tested with five fictional job-description scenarios.
+The agent was evaluated with five fictional job-description scenarios.
 
 | Test Scenario | Expected Result | Actual Result | Status |
 |---|---|---|---|
@@ -199,6 +201,6 @@ The agent was tested with five fictional job-description scenarios.
 | Weak match | Weak fit | Weak fit | Passed |
 | Partial match | Moderate fit | Moderate fit | Passed |
 
-Test resumes, job descriptions, and generated reports are excluded from Git
-to prevent private information from being uploaded.
+A fictional sample report is available at
+[`examples/sample_job_match_report.md`](examples/sample_job_match_report.md).
 
