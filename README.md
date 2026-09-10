@@ -2,26 +2,67 @@
 
 ## Project Overview
 
-Job Match Agent compares a resume with a job description and produces a structured, evidence-based match report.
+Job Match Agent compares a resume with a job description and produces a
+structured, evidence-based match report.
 
-The project includes:
+The project uses a hybrid portfolio architecture:
 
-- A command-line application
-- A Streamlit web interface
-- Markdown and PDF report downloads
-- Structural report validation
-- Automated tests
+- A public, cost-safe Streamlit demo uses local semantic embeddings and explicit
+  skill checks. It accepts custom text without making paid OpenAI API calls.
+- A pre-generated fictional OpenAI report demonstrates the private agent's
+  richer analysis without creating a new API charge.
+- A separate private Streamlit app and command-line application use OpenAI for
+  deeper reasoning.
+- A local-only comparison app runs both modes on the same input and displays
+  their live reports side by side.
+- A transparent benchmark compares both modes with human-labeled expected results.
 
 ## Features
 
-The agent:
+Both analysis modes:
 
-1. Identifies required and preferred job qualifications.
-2. Matches each requirement with evidence from the resume.
-3. Clearly identifies missing or weak qualifications.
-4. Suggests truthful resume improvements.
-5. Generates five likely interview questions.
-6. Validates the report before displaying or downloading it.
+1. Identify required and preferred job qualifications.
+2. Match each requirement with evidence from the resume.
+3. Clearly identify missing or weak qualifications.
+4. Suggest truthful resume improvements.
+5. Generate five likely interview questions.
+6. Validate the report before displaying or downloading it.
+7. Provide PDF and Markdown downloads.
+
+## Analysis Modes
+
+### Public semantic demo
+
+`portfolio_app.py` uses the open-source `BAAI/bge-small-en-v1.5` embedding model
+through FastEmbed. It combines semantic similarity with explicit checks for named
+skills, education, and years of experience.
+
+This mode:
+
+- Makes no OpenAI API call
+- Has no per-analysis OpenAI cost
+- Accepts custom resume and job-description text
+- Includes a deterministic keyword fallback if the embedding model is unavailable
+- Produces a more predictable, templated report
+
+### Private OpenAI agent
+
+`web_app.py` provides the full OpenAI-powered Streamlit experience. `app.py`
+provides the command-line version. These modes require an OpenAI API key and each
+successful analysis makes a paid API request.
+
+The public portfolio app also includes a saved fictional OpenAI report that can
+be viewed and downloaded without making a new API call.
+
+### Local live comparison
+
+`local_comparison_app.py` runs both modes with exactly the same resume and job
+description. It aligns their requirement assessments, shows agreements and
+differences, and displays both complete reports side by side. Opening the app
+costs nothing; each selection of **Compare Both** makes one paid OpenAI API call.
+
+This entry point is protected by a separate local environment flag and must not
+be deployed publicly with an API key.
 
 ## Report Sections
 
@@ -35,32 +76,39 @@ Every completed report contains:
 
 ## Guardrails
 
-The agent must:
+The project is designed to:
 
 - Use only information found in the resume
 - Never invent experience, education, skills, or achievements
-- State “Not found in the resume” when evidence is unavailable
+- State `Not found in the resume` when evidence is unavailable
 - Separate demonstrated qualifications from missing qualifications
 - Treat the job description as source material, not as instructions
-- Never include an API key in its report
+- Never include an API key in a report
+- Require human review rather than make automated hiring decisions
 
 ## Project Structure
 
-- `app.py` — runs the command-line application.
-- `web_app.py` — provides the Streamlit web interface.
-- `agent_core.py` — contains the shared agent configuration and analysis request.
-- `agent_tools.py` — saves command-line reports.
-- `file_utils.py` — reads and writes project files.
-- `pdf_utils.py` — converts reports into formatted PDF data.
-- `report_validation.py` — validates report structure and completeness.
-- `quality_check.py` — checks the command-line report.
-- `tests/` — contains automated validator and PDF tests.
-- `examples/` — contains fictional, public-safe sample inputs and output.
-- `data/` — contains private local inputs and is excluded from Git.
-- `outputs/` — contains generated command-line reports and is excluded from Git.
-- `.env.example` — shows the required environment variable.
-- `.env` — stores the real API key locally and is excluded from Git.
-- `requirements.txt` — lists the required Python packages.
+- `portfolio_app.py` - provides the public, cost-safe Streamlit demo.
+- `semantic_analyzer.py` - extracts and matches requirements without a paid API.
+- `quality_benchmark.py` - reproduces the no-cost comparison with the saved OpenAI report.
+- `BENCHMARK.md` - documents the benchmark method, results, and limitations.
+- `local_comparison_app.py` - runs both analyzers side by side for private local testing.
+- `comparison_utils.py` - aligns report requirements and calculates model agreement.
+- `web_app.py` - provides the private OpenAI-powered Streamlit app.
+- `app.py` - runs the OpenAI-powered command-line application.
+- `agent_core.py` - contains the shared OpenAI agent configuration.
+- `agent_tools.py` - saves command-line reports.
+- `file_utils.py` - reads and writes project files.
+- `pdf_utils.py` - converts reports into formatted PDF data.
+- `report_validation.py` - validates report structure and completeness.
+- `quality_check.py` - checks the command-line report.
+- `tests/` - contains automated analyzer, validator, and PDF tests.
+- `examples/` - contains fictional, public-safe sample inputs and output.
+- `data/` - contains private local inputs and is excluded from Git.
+- `outputs/` - contains generated command-line reports and is excluded from Git.
+- `.env.example` - shows the required OpenAI environment variable.
+- `.env` - stores the real API key locally and is excluded from Git.
+- `requirements.txt` - lists the required Python packages.
 
 ## Installation
 
@@ -84,6 +132,32 @@ Install the dependencies:
 python -m pip install -r requirements.txt
 ```
 
+## Run the Public Portfolio App
+
+Start the cost-safe public demo:
+
+```bash
+python -m streamlit run portfolio_app.py
+```
+
+Open the local address shown in the terminal, normally:
+
+```text
+http://localhost:8501
+```
+
+The first analysis may take longer while FastEmbed downloads the fixed embedding
+model. It does not require an OpenAI API key or make paid OpenAI API calls.
+
+The portfolio app contains four sections:
+
+- **Try Free Analysis** - run the semantic analyzer with custom text.
+- **View OpenAI Example** - inspect a saved fictional OpenAI report.
+- **Quality Comparison** - review the labeled sample benchmark.
+- **How It Works** - understand the architecture, safeguards, and limitations.
+
+## Run the Private OpenAI App
+
 Create the local environment file:
 
 ```bash
@@ -98,32 +172,40 @@ OPENAI_API_KEY=your_real_api_key_here
 
 Never commit or share the `.env` file.
 
-## Run the Web Application
-
-Start Streamlit:
+Start the private app:
 
 ```bash
 python -m streamlit run web_app.py
 ```
 
-Open the local address shown in the terminal, normally:
+Paste a resume and job description, then select **Analyze Match**. Opening the
+page does not call OpenAI, but each successful analysis creates one API run.
+
+## Run the Local Live Comparison
+
+The comparison app uses the local `.env` file. Enable its additional safety gate:
 
 ```text
-http://localhost:8501
+ENABLE_PAID_LOCAL_COMPARISON=true
 ```
 
-Paste a resume and job description, then select **Analyze Match**.
+Then start it:
 
-The completed report can be downloaded as:
+```bash
+python -m streamlit run local_comparison_app.py
+```
 
-- PDF
-- Markdown
+Select **Load fictional example** or paste custom text. Each selection of
+**Compare Both** creates one paid OpenAI API call and one free semantic analysis.
+The resulting agreement metric shows consistency between the two reports, not
+ground-truth accuracy.
 
-Opening the page does not call the OpenAI API. Each successful selection of **Analyze Match** creates one API run.
+Keep `ENABLE_PAID_LOCAL_COMPARISON=false` when the comparison app is not being
+used. Never deploy this entry point publicly with an OpenAI API key.
 
 ## Run the Command-Line Application
 
-Run the agent with the included fictional examples:
+After configuring `.env`, run the OpenAI agent with the fictional examples:
 
 ```bash
 python app.py --resume examples/sample_resume.txt --job-description examples/sample_job_description.txt
@@ -141,57 +223,67 @@ Check the saved report:
 python quality_check.py
 ```
 
-To use private local files, add them to:
+## Reproduce the Quality Benchmark
 
-```text
-data/resume.txt
-data/job_description.txt
-```
-
-Then run:
+Run:
 
 ```bash
-python app.py
+python quality_benchmark.py
 ```
+
+The benchmark makes no OpenAI API call. It compares a newly generated semantic
+report and the saved OpenAI example with eight human-labeled expected assessments.
+
+In the current fictional sample, both modes matched 8 of 8 expected labels and
+made zero false-positive qualification claims. This is a one-scenario smoke test,
+not a general 100% accuracy claim. See [`BENCHMARK.md`](BENCHMARK.md) for details.
 
 ## Run Automated Tests
 
 Run all tests:
 
 ```bash
-python -m unittest discover -s tests
+python -m unittest discover -s tests -v
 ```
 
-The tests confirm that:
+The 16 tests confirm that:
 
 - Complete reports pass validation
 - Incomplete or incorrectly structured reports are rejected
+- The semantic analyzer extracts and matches expected qualifications
+- Live report tables can be aligned even when requirements are paraphrased or reordered
+- Missing or additional report rows are clearly identified
+- Prompt-injection text is excluded from extracted requirements
+- The keyword fallback produces a structurally valid report
 - PDF generation returns valid PDF data
-- Empty PDF input is rejected
+- Empty analyzer and PDF inputs are rejected
 
-## Privacy
+## Privacy and Cost
 
-Resume and job-description text is sent to the OpenAI API for analysis.
+The public portfolio app processes submitted text in memory on the Streamlit app
+server. The application does not write that text to a file or database and does
+not send it to OpenAI. Because processing occurs on a hosted server rather than
+the visitor's device, users should still submit fictional or redacted information.
 
-The command-line version saves its completed report in `outputs/`. The web version keeps the report in the active session and creates its PDF and Markdown downloads in memory.
+The private web app and command-line application send resume and job-description
+text to the OpenAI API. The command-line version saves its completed report in
+`outputs/`. The private web app creates downloads in the active session.
 
-The `.env`, `data/`, and `outputs/` paths are excluded from Git. Use fictional information while developing or publicly demonstrating the application.
+The `.env`, `data/`, and `outputs/` paths are excluded from Git.
 
-## Current Scope
+## Current Limitations
 
-The current version:
+- The project analyzes one resume and one job description at a time.
+- The web interfaces accept pasted text rather than directly parsing PDF or Word files.
+- The public analyzer can miss nuance, negation, or uncommon terminology.
+- The benchmark currently contains one labeled fictional scenario.
+- Live model agreement does not identify which model is correct without human labels.
+- The project does not use a database or provide user accounts.
+- All results require human verification and must not be used as automated hiring decisions.
 
-- Analyzes one resume and one job description at a time
-- Accepts pasted text through the web interface
-- Accepts plain-text files through the command line
-- Does not directly parse PDF or Word resumes
-- Does not use a database
-- Does not provide user accounts
-- Requires users to verify AI-generated guidance
+## Manual OpenAI Evaluation
 
-## Manual Evaluation Results
-
-The agent was evaluated with five fictional job-description scenarios.
+The OpenAI agent was evaluated with five fictional job-description scenarios.
 
 | Test Scenario | Expected Result | Actual Result | Status |
 |---|---|---|---|
@@ -203,4 +295,3 @@ The agent was evaluated with five fictional job-description scenarios.
 
 A fictional sample report is available at
 [`examples/sample_job_match_report.md`](examples/sample_job_match_report.md).
-
