@@ -5,6 +5,15 @@
 Job Match Agent compares a resume with a job description and produces a
 structured, evidence-based match report.
 
+## Live Public Demo
+
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ramil-job-match-demo.streamlit.app/)
+
+Try the cost-safe public portfolio app at
+[ramil-job-match-demo.streamlit.app](https://ramil-job-match-demo.streamlit.app/).
+It accepts custom resume and job-description text without making paid OpenAI
+API calls. Use fictional or redacted information in public demonstrations.
+
 The project uses a hybrid portfolio architecture:
 
 - A public, cost-safe Streamlit demo uses local semantic embeddings and explicit
