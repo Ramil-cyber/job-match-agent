@@ -1,5 +1,7 @@
 # Job Match Agent
 
+![AI-powered Job Match Agent comparing a resume with job requirements](assets/job-match-agent-readme-hero.png)
+
 ## Project Overview
 
 Job Match Agent compares a resume with a job description and produces a
