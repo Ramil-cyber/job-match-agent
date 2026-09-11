@@ -1,54 +1,54 @@
-# Quality Benchmark
+# OpenAI Quality Benchmark
 
 ## Purpose
 
-This benchmark provides a transparent, reproducible comparison between:
+This benchmark evaluates a previously generated OpenAI job-match report against
+human-labeled expected assessments.
 
-- The free public analyzer using local semantic embeddings and explicit skill checks
-- A previously generated report from the private OpenAI agent
-- Human-labeled expected assessments
-
-Running the benchmark makes no OpenAI API call. It uses fictional, public-safe
-inputs from the `examples/` directory.
+Running the benchmark makes no OpenAI API call. It uses the fictional,
+public-safe example in the `examples/` directory.
 
 ## Method
 
 The sample job description contains eight required or preferred qualifications.
-Each qualification was labeled as `Meets`, `Partial`, or `Missing` based only on
-the fictional resume. The benchmark normalizes both reports to those three
-classes and compares them with the expected labels.
+Each qualification was labeled as `Meets`, `Partial`, or `Missing` based only
+on the fictional resume. The benchmark normalizes the saved OpenAI report to
+those three classes and compares its assessments with the expected labels.
 
-It also counts false-positive qualification claims, where a report states that a
-missing qualification is demonstrated.
+It also counts:
+
+- False-positive qualification claims, where a missing qualification is
+  presented as demonstrated
+- Missed demonstrated matches, where a demonstrated qualification is presented
+  as missing
 
 ## Results
 
-| Requirement | Expected | Free Semantic | Saved OpenAI |
-|---|---|---|---|
-| Quantitative bachelor's degree | Meets | Meets | Meets |
-| Two years of analytics experience | Meets | Meets | Meets |
-| Python and SQL | Meets | Meets | Meets |
-| Forecasting or machine learning | Meets | Meets | Meets |
-| AWS | Missing | Missing | Missing |
-| Written and verbal communication | Partial | Partial | Partial |
-| Natural language processing | Missing | Missing | Missing |
-| Executive dashboards | Partial | Partial | Partial |
+| Requirement | Expected | Saved OpenAI |
+|---|---|---|
+| Quantitative bachelor's degree | Meets | Meets |
+| Two years of analytics experience | Meets | Meets |
+| Python and SQL | Meets | Meets |
+| Forecasting or machine learning | Meets | Meets |
+| AWS | Missing | Missing |
+| Written and verbal communication | Partial | Partial |
+| Natural language processing | Missing | Missing |
+| Executive dashboards | Partial | Partial |
 
-| Metric | Free Semantic | Saved OpenAI |
-|---|---:|---:|
-| Requirement classifications matching expected labels | 8/8 | 8/8 |
-| False-positive qualification claims | 0 | 0 |
+| Metric | Saved OpenAI |
+|---|---:|
+| Requirement classifications matching expected labels | 8/8 |
+| False-positive qualification claims | 0 |
+| Missed demonstrated matches | 0 |
 
 ## Interpretation
 
-Both modes correctly classified all eight qualifications in this one fictional
-scenario. The saved OpenAI report provides more tailored reasoning, resume
-improvements, and interview questions. The free analyzer produces a more
-predictable, templated report without per-analysis API charges.
+The saved OpenAI report matched all eight expected qualification labels in this
+one fictional scenario and made no false-positive qualification claims.
 
-This benchmark is a smoke test, not evidence of general 100% accuracy. A broader
-evaluation would require more labeled resumes and job descriptions covering
-strong, moderate, weak, ambiguous, and adversarial cases.
+This is a reproducible smoke test, not evidence of general 100% accuracy. A
+broader evaluation would require more labeled resumes and job descriptions
+covering strong, moderate, weak, ambiguous, and adversarial cases.
 
 ## Reproduce the Benchmark
 
@@ -58,5 +58,5 @@ Install the project dependencies, then run:
 python quality_benchmark.py
 ```
 
-The script loads the fixed open-source embedding model, generates a new free
-report, reads the saved OpenAI example, and prints the comparison metrics.
+The script validates the saved OpenAI report, extracts its requirement
+assessments, and prints the evaluation metrics. It does not make an API call.

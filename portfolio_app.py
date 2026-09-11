@@ -1,37 +1,31 @@
 from pathlib import Path
 
 import streamlit as st
-from fastembed import TextEmbedding
 
 from pdf_utils import create_job_match_pdf
+from quality_benchmark import (
+    EXPECTED_ASSESSMENTS,
+    calculate_metrics,
+    extract_assessments,
+)
 from report_validation import validate_job_match_report
-from semantic_analyzer import create_semantic_job_match_report
 
-MAX_INPUT_CHARACTERS = 10_000
-EMBEDDING_MODEL_NAME = "BAAI/bge-small-en-v1.5"
+
 PROJECT_ROOT = Path(__file__).resolve().parent
 SAMPLE_RESUME_PATH = PROJECT_ROOT / "examples" / "sample_resume.txt"
 SAMPLE_JOB_PATH = PROJECT_ROOT / "examples" / "sample_job_description.txt"
 SAMPLE_REPORT_PATH = PROJECT_ROOT / "examples" / "sample_job_match_report.md"
 
 
-@st.cache_resource(show_spinner=False)
-def load_embedding_model() -> TextEmbedding:
-    """Load one lightweight local model for all visitor sessions."""
-
-    return TextEmbedding(model_name=EMBEDDING_MODEL_NAME)
-
-
 @st.cache_data
 def load_sample_files() -> tuple[str, str, str]:
-    """Load and validate the fictional portfolio example."""
+    """Load and validate the fictional OpenAI portfolio example."""
 
     sample_resume = SAMPLE_RESUME_PATH.read_text(encoding="utf-8")
     sample_job = SAMPLE_JOB_PATH.read_text(encoding="utf-8")
     sample_report = validate_job_match_report(
         SAMPLE_REPORT_PATH.read_text(encoding="utf-8")
     )
-
     return sample_resume, sample_job, sample_report
 
 
@@ -65,127 +59,38 @@ def render_report_downloads(report: str, file_prefix: str) -> None:
 
 
 st.set_page_config(
-    page_title="Job Match Agent Portfolio Demo",
+    page_title="Job Match Agent Portfolio",
     page_icon="📄",
     layout="centered",
 )
 
-if "semantic_report" not in st.session_state:
-    st.session_state.semantic_report = None
-
-if "semantic_engine" not in st.session_state:
-    st.session_state.semantic_engine = None
-
+sample_resume, sample_job, sample_report = load_sample_files()
 
 st.title("Job Match Agent")
 st.write(
-    "Explore a cost-safe portfolio version of an evidence-based "
-    "resume and job-description matching system."
+    "Explore an OpenAI-powered, evidence-based resume and job-description "
+    "matching system through a fictional portfolio example."
+)
+st.info(
+    "The public portfolio displays a saved OpenAI report and makes no live API "
+    "call. Live analysis remains available only in the private deployment while "
+    "authentication and usage limits are being developed."
 )
 
-live_tab, sample_tab, benchmark_tab, about_tab = st.tabs(
+report_tab, evaluation_tab, about_tab = st.tabs(
     [
-        "Try Free Analysis",
         "View OpenAI Example",
-        "Quality Comparison",
+        "Quality Evaluation",
         "How It Works",
     ]
 )
 
 
-with live_tab:
-    st.subheader("Try the free local analysis")
-    st.info(
-        "This public mode uses a lightweight open-source embedding model on "
-        "the app server. It does not use an OpenAI API key or make paid API calls."
-    )
-    st.caption(
-        "Privacy: The application processes submitted text in memory and does "
-        "not write it to a file or database. Use fictional or redacted information "
-        "in any public demonstration."
-    )
-
-    with st.form("semantic_job_match_form"):
-        resume_text = st.text_area(
-            "Resume",
-            height=250,
-            max_chars=MAX_INPUT_CHARACTERS,
-            placeholder="Paste the resume text here.",
-        )
-        job_description_text = st.text_area(
-            "Job Description",
-            height=250,
-            max_chars=MAX_INPUT_CHARACTERS,
-            placeholder="Paste the job description here.",
-        )
-        submitted = st.form_submit_button(
-            "Run Free Analysis",
-            type="primary",
-            width="stretch",
-        )
-
-    if submitted:
-        st.session_state.semantic_report = None
-        st.session_state.semantic_engine = None
-
-        if not resume_text.strip() or not job_description_text.strip():
-            st.error("Please provide both a resume and a job description.")
-        else:
-            try:
-                with st.spinner(
-                    "Loading the local model and analyzing the match...",
-                    show_time=True,
-                ):
-                    try:
-                        embedding_model = load_embedding_model()
-                    except Exception:
-                        embedding_model = None
-
-                    report, engine_name = create_semantic_job_match_report(
-                        resume_text,
-                        job_description_text,
-                        embedding_model,
-                    )
-                    validated_report = validate_job_match_report(report)
-
-                st.session_state.semantic_report = validated_report
-                st.session_state.semantic_engine = engine_name
-                st.success("Free analysis complete. No paid API was used.")
-            except ValueError as error:
-                st.error(str(error))
-            except Exception:
-                st.error(
-                    "The local analysis could not be completed. "
-                    "Please wait a moment and try again."
-                )
-
-    if st.session_state.semantic_report:
-        st.divider()
-
-        if st.session_state.semantic_engine == "lexical fallback":
-            st.warning(
-                "The embedding model was temporarily unavailable, so the app "
-                "used its simpler keyword fallback."
-            )
-
-        st.markdown(st.session_state.semantic_report)
-        render_report_downloads(
-            st.session_state.semantic_report,
-            "free_job_match_report",
-        )
-        st.caption(
-            "Demonstration guidance only. Local semantic similarity can miss "
-            "context, so verify every result before using it."
-        )
-
-
-with sample_tab:
-    sample_resume, sample_job, sample_report = load_sample_files()
-
+with report_tab:
     st.subheader("Pre-generated OpenAI report")
-    st.info(
-        "This fictional example shows the richer report produced by the private "
-        "OpenAI agent. Viewing or downloading it makes no API call."
+    st.caption(
+        "The resume, job description, and report are fictional and safe for "
+        "public demonstration."
     )
 
     with st.expander("View the fictional sample inputs"):
@@ -196,96 +101,66 @@ with sample_tab:
 
     st.markdown(sample_report)
     render_report_downloads(sample_report, "sample_openai_job_match_report")
-
-
-with benchmark_tab:
-    st.subheader("Transparent quality comparison")
-    st.info(
-        "This no-cost benchmark compares the public analyzer and the saved "
-        "OpenAI report with human-labeled expected results for one fictional "
-        "resume and job description. Opening this tab makes no API call."
+    st.caption(
+        "AI-generated guidance. Verify every result before using it in a job "
+        "application."
     )
 
+
+with evaluation_tab:
+    st.subheader("Human-labeled quality evaluation")
+    st.info(
+        "This reproducible smoke test compares the saved OpenAI report with "
+        "eight human-labeled expected assessments. Opening this tab makes no "
+        "API call."
+    )
+
+    openai_assessments = extract_assessments(sample_report)
+    metrics = calculate_metrics(openai_assessments)
     st.table(
         [
             {
-                "Requirement": "Quantitative bachelor's degree",
-                "Expected": "Meets",
-                "Free": "Meets",
-                "OpenAI": "Meets",
-            },
-            {
-                "Requirement": "Two years of analytics experience",
-                "Expected": "Meets",
-                "Free": "Meets",
-                "OpenAI": "Meets",
-            },
-            {
-                "Requirement": "Python and SQL",
-                "Expected": "Meets",
-                "Free": "Meets",
-                "OpenAI": "Meets",
-            },
-            {
-                "Requirement": "Forecasting or machine learning",
-                "Expected": "Meets",
-                "Free": "Meets",
-                "OpenAI": "Meets",
-            },
-            {
-                "Requirement": "AWS",
-                "Expected": "Missing",
-                "Free": "Missing",
-                "OpenAI": "Missing",
-            },
-            {
-                "Requirement": "Written and verbal communication",
-                "Expected": "Partial",
-                "Free": "Partial",
-                "OpenAI": "Partial",
-            },
-            {
-                "Requirement": "Natural language processing",
-                "Expected": "Missing",
-                "Free": "Missing",
-                "OpenAI": "Missing",
-            },
-            {
-                "Requirement": "Executive dashboards",
-                "Expected": "Partial",
-                "Free": "Partial",
-                "OpenAI": "Partial",
-            },
+                "Requirement": requirement,
+                "Expected": expected,
+                "OpenAI": actual,
+            }
+            for (requirement, expected), actual in zip(
+                EXPECTED_ASSESSMENTS,
+                openai_assessments,
+            )
         ]
     )
 
-    free_metric, openai_metric = st.columns(2)
-    free_metric.metric("Free classification", "8/8", "0 false claims")
-    openai_metric.metric("Saved OpenAI classification", "8/8", "0 false claims")
-
-    st.markdown(
-        "The two modes agreed with every expected requirement label in this "
-        "sample. The saved OpenAI report provides more tailored explanations, "
-        "resume suggestions, and interview questions, while the public analyzer "
-        "uses a more predictable template."
+    accuracy_column, false_positive_column, missed_match_column = st.columns(3)
+    accuracy_column.metric(
+        "Expected labels matched",
+        f"{metrics['correct']}/{metrics['total']}",
     )
+    false_positive_column.metric(
+        "False qualification claims",
+        metrics["false_positive_claims"],
+    )
+    missed_match_column.metric(
+        "Missed demonstrated matches",
+        metrics["missed_demonstrated_matches"],
+    )
+
     st.warning(
-        "This is a smoke test using one fictional scenario, not a general 100% "
+        "This result covers one fictional scenario and is not a general 100% "
         "accuracy claim. Results for other resumes and job descriptions can differ."
     )
 
 
 with about_tab:
-    st.subheader("Two analysis modes, one tested workflow")
+    st.subheader("One OpenAI analysis workflow")
     st.markdown(
         """
-- **Public demo:** Uses local semantic embeddings plus explicit skill checks. It
-  accepts custom text and has no per-analysis API cost.
-- **Private AI agent:** Uses OpenAI for deeper reasoning and natural-language
-  reporting. Its API key is stored only in the private deployment.
-- **Shared safeguards:** Both modes keep evidence separate from gaps, avoid
-  inventing qualifications, validate report structure, and support PDF and
-  Markdown downloads.
+- **Private live agent:** Uses OpenAI for requirement matching, evidence-based
+  reasoning, resume suggestions, and interview questions.
+- **Public portfolio:** Displays a validated, pre-generated OpenAI report without
+  accepting user data or exposing an API key.
+- **Guardrails:** Uses only resume evidence, separates matches from gaps, rejects
+  incomplete reports, and supports PDF and Markdown downloads.
         """
     )
     st.warning(
