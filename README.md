@@ -13,11 +13,13 @@ produce a structured, evidence-based match report.
 
 Explore the portfolio at
 [ramil-job-match-demo.streamlit.app](https://ramil-job-match-demo.streamlit.app/).
-The public app displays a validated, pre-generated OpenAI report using fictional
-inputs. It accepts no user data, requires no API key, and makes no live API call.
+The public app always includes a validated, pre-generated OpenAI report using
+fictional inputs. Its optional live analyzer is protected by Google sign-in,
+persistent usage limits, input constraints, and server-side secrets.
 
-Live OpenAI analysis remains available only in the private Streamlit deployment
-while authentication and usage limits are being developed.
+The live public feature is disabled by default in the repository and fails
+closed if authentication, quota storage, or any required secret is unavailable.
+The original OpenAI Streamlit deployment remains private and unchanged.
 
 ## Features
 
@@ -30,16 +32,18 @@ The OpenAI agent:
 5. Generates five likely interview questions.
 6. Validates the report before displaying or downloading it.
 7. Provides PDF and Markdown downloads.
+8. Screens public submissions before running the paid analysis.
+9. Applies persistent per-account, daily, and overall public usage limits.
 
 ## OpenAI Analysis Workflow
 
-`web_app.py` provides the live OpenAI-powered Streamlit experience. `app.py`
-provides the command-line version. Both require an OpenAI API key, and each
-successful analysis makes a paid API request.
+`portfolio_app.py` always provides a public view of a saved fictional OpenAI
+report. When its server-side feature flag is enabled, it also provides live
+analysis to verified users. Before a paid generation can begin, the app must
+successfully reserve one attempt in the persistent quota database.
 
-`portfolio_app.py` provides a public view of a saved fictional OpenAI report.
-This keeps the portfolio accessible without placing an API key in the public
-app or allowing unmetered API usage.
+`web_app.py` provides the separate private OpenAI-powered Streamlit experience.
+`app.py` provides the command-line version. Both remain available for owner use.
 
 `quality_benchmark.py` evaluates the saved OpenAI report against eight
 human-labeled expected qualification assessments without making another API
@@ -67,25 +71,38 @@ The project is designed to:
 - Ignore instructions embedded inside submitted resume or job-description text
 - Never include an API key in a report
 - Require human review rather than make automated hiring decisions
+- Keep API, authentication, database, and hashing secrets outside Git
+- Require verified sign-in before public live analysis
+- Store only a pseudonymous user identifier in the quota database
+- Enforce per-account, shared daily, and overall limits atomically
+- Stop safely without calling OpenAI if the quota service is unavailable
+- Constrain public input length, output tokens, and model turns
+- Disable sensitive agent tracing for public submissions
+- Send a pseudonymous safety identifier with each public generation
 
 ## Project Structure
 
-- `portfolio_app.py` - displays the public saved OpenAI portfolio example.
+- `portfolio_app.py` - provides the public saved example and gated live interface.
+- `public_analysis.py` - validates settings, pseudonymizes users, and enforces quotas.
+- `public_openai.py` - screens and runs one constrained public OpenAI analysis.
 - `web_app.py` - provides the private live OpenAI Streamlit app.
 - `app.py` - runs the OpenAI-powered command-line application.
 - `agent_core.py` - contains the shared OpenAI agent configuration.
 - `agent_tools.py` - saves command-line reports.
 - `quality_benchmark.py` - evaluates the saved OpenAI example against human labels.
 - `BENCHMARK.md` - documents the evaluation method, results, and limitations.
+- `PUBLIC_DEPLOYMENT.md` - documents the fail-closed public rollout sequence.
 - `file_utils.py` - reads and writes project files.
 - `pdf_utils.py` - converts reports into formatted PDF data.
 - `report_validation.py` - validates report structure and completeness.
 - `quality_check.py` - checks the command-line report.
+- `database/quota_schema.sql` - creates atomic persistent quota functions.
 - `tests/` - contains automated benchmark, validator, and PDF tests.
 - `examples/` - contains fictional, public-safe sample inputs and output.
 - `data/` - contains private local inputs and is excluded from Git.
 - `outputs/` - contains generated command-line reports and is excluded from Git.
-- `.env.example` - shows the required OpenAI environment variable.
+- `.streamlit/secrets.example.toml` - shows safe cloud configuration placeholders.
+- `.env.example` - shows safe local configuration placeholders.
 - `.env` - stores the real API key locally and is excluded from Git.
 - `requirements.txt` - lists the required Python packages.
 
@@ -113,7 +130,7 @@ python -m pip install -r requirements.txt
 
 ## Run the Public Portfolio App
 
-Start the public saved-example app:
+Start the public app:
 
 ```bash
 python -m streamlit run portfolio_app.py
@@ -125,7 +142,7 @@ Open the local address shown in the terminal, normally:
 http://localhost:8501
 ```
 
-The portfolio app contains three sections:
+With the live feature disabled, the portfolio app contains three sections:
 
 - **View OpenAI Example** - inspect the fictional resume, job description, and
   saved OpenAI report.
@@ -134,6 +151,48 @@ The portfolio app contains three sections:
 - **How It Works** - review the architecture, safeguards, and limitations.
 
 Opening or downloading content from this app makes no API call.
+
+## Configure Limited Public OpenAI Analysis
+
+The public live feature requires two external protections in addition to the
+OpenAI API key:
+
+1. **Google OpenID Connect** identifies each user through Streamlit's native
+   `st.login()` flow.
+2. **A dedicated Supabase quota database** stores only pseudonymous counters and
+   reserves attempts atomically.
+
+Run [`database/quota_schema.sql`](database/quota_schema.sql) once in the
+dedicated Supabase project's SQL editor. Then copy the safe structure in
+[`secrets.example.toml`](.streamlit/secrets.example.toml) into the local ignored
+`.streamlit/secrets.toml` file or the public app's Community Cloud secrets.
+
+The default limits are:
+
+- 3 attempts for each verified account
+- 10 attempts shared across all users per UTC day
+- 100 attempts across the lifetime of the public demonstration
+- 8,000 characters for each submitted document
+- 3,000 maximum output tokens and one agent turn per analysis
+
+The counters represent reserved API attempts. An attempt is counted before the
+OpenAI request starts and remains counted if the provider or report validation
+later fails. This conservative behavior prevents repeated failures from bypassing
+the cost limits.
+
+Keep this setting at `false` during setup and testing:
+
+```text
+ENABLE_PUBLIC_OPENAI_ANALYSIS=false
+```
+
+Change it to `true` only after Google sign-in, the quota database, the public-app
+secrets, and an OpenAI spending limit have all been verified. The existing API
+key value does not need to be placed in the repository or changed in the private
+app.
+
+Follow the complete fail-closed rollout sequence in
+[`PUBLIC_DEPLOYMENT.md`](PUBLIC_DEPLOYMENT.md).
 
 ## Run the Private OpenAI App
 
@@ -214,24 +273,42 @@ The tests confirm that:
 - Benchmark metrics count incorrect and unsupported qualification claims
 - PDF generation returns valid PDF data
 - Empty report and PDF inputs are rejected
+- Public live analysis is disabled by default
+- Missing authentication or quota configuration fails closed
+- User identifiers are pseudonymized before storage or API use
+- Quota-service errors prevent OpenAI requests
+- Public inputs, output size, and agent turns are constrained
+- Safety screening stops flagged text before paid generation
+- Database functions use row locks for atomic limits
 
 ## Privacy and Cost
 
-The public portfolio app reads only the fictional files committed in the
-`examples/` directory. It accepts no submitted resume or job-description text,
-does not contain an API key, and makes no API call.
+The saved-example sections read only the fictional files committed in the
+`examples/` directory and make no API call.
+
+The optional public live section requires sign-in and asks users to submit only
+fictional or redacted text. The app does not persist submitted resume text, job
+descriptions, or generated reports. The quota database stores a salted,
+pseudonymous account key and counters, not the user's email or documents.
+
+Each accepted public submission reserves one quota attempt, runs OpenAI safety
+screening, and can make at most one paid report-generation request. API and
+authentication credentials stay in Streamlit secrets and never enter the
+browser or repository.
 
 The private web app and command-line application send resume and job-description
 text to the OpenAI API. The command-line version saves its completed report in
 `outputs/`. The private web app creates downloads in the active session.
 
-The `.env`, `data/`, and `outputs/` paths are excluded from Git.
+The `.env`, `.streamlit/secrets.toml`, `data/`, and `outputs/` paths are excluded
+from Git.
 
 ## Current Limitations
 
-- Live OpenAI analysis is currently restricted to the private deployment.
-- The project does not yet provide public authentication, usage limits, or a
-  persistent usage database.
+- Public usage limits reduce financial risk but cannot prove that one person has
+  only one identity-provider account.
+- The public feature depends on Google OpenID Connect, Supabase, Streamlit
+  Community Cloud, and OpenAI availability.
 - The project analyzes one resume and one job description at a time.
 - The live interface accepts pasted text rather than directly parsing PDF or
   Word files.

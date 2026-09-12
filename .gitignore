@@ -3,6 +3,7 @@
 
 # API keys
 .env
+.streamlit/secrets.toml
 
 # Private resumes and job descriptions
 data/
