@@ -1,4 +1,4 @@
 openai-agents==0.22.0
 python-dotenv==1.2.3
-streamlit==1.63.0
+streamlit[auth]==1.63.0
 reportlab==5.0.1
