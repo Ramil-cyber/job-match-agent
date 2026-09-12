@@ -19,6 +19,14 @@ class QuotaSchemaTests(unittest.TestCase):
         self.assertIn("analysis_daily_usage", self.schema)
         self.assertIn("analysis_global_usage", self.schema)
 
+    def test_reservation_avoids_output_column_name_ambiguity(self):
+        self.assertIn(
+            "update public.analysis_daily_usage as d",
+            self.schema,
+        )
+        self.assertIn("where d.usage_date = v_usage_date", self.schema)
+        self.assertNotIn("on conflict (usage_date)", self.schema)
+
     def test_tables_are_not_accessible_to_public_users(self):
         self.assertGreaterEqual(
             self.schema.count("enable row level security"),
