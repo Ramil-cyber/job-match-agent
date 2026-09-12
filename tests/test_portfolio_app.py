@@ -49,7 +49,12 @@ class PortfolioAppTests(unittest.TestCase):
         }
 
         with patch.dict(os.environ, settings, clear=False):
-            app = AppTest.from_file(PORTFOLIO_APP_PATH).run(timeout=30)
+            app = AppTest.from_file(PORTFOLIO_APP_PATH)
+            # AppTest otherwise discovers the developer's real ignored
+            # .streamlit/secrets.toml. Supply a non-empty, auth-free mapping
+            # so this fail-closed test is independent of local credentials.
+            app.secrets = {"test_isolation": True}
+            app.run(timeout=30)
 
         self.assertEqual(len(app.exception), 0)
         self.assertEqual(len(app.text_area), 0)

@@ -146,7 +146,7 @@ begin
     -- Every caller takes locks in the same global -> daily -> user order.
     insert into public.analysis_global_usage (counter_key)
     values ('all_time')
-    on conflict (counter_key) do nothing;
+    on conflict do nothing;
 
     select g.attempt_count
       into v_total_used
@@ -156,7 +156,9 @@ begin
 
     insert into public.analysis_daily_usage (usage_date)
     values (v_usage_date)
-    on conflict (usage_date) do nothing;
+    -- Do not name usage_date in the conflict target: usage_date is also an
+    -- output parameter of this RETURNS TABLE function.
+    on conflict do nothing;
 
     select d.attempt_count
       into v_daily_used
@@ -166,7 +168,7 @@ begin
 
     insert into public.analysis_user_usage (user_key)
     values (p_user_key)
-    on conflict (user_key) do nothing;
+    on conflict do nothing;
 
     select u.attempt_count
       into v_user_used
@@ -181,20 +183,20 @@ begin
     elsif v_user_used >= p_user_limit then
         v_denial_reason := 'user_limit';
     else
-        update public.analysis_global_usage
-           set attempt_count = attempt_count + 1,
+        update public.analysis_global_usage as g
+           set attempt_count = g.attempt_count + 1,
                updated_at = now()
-         where counter_key = 'all_time';
+         where g.counter_key = 'all_time';
 
-        update public.analysis_daily_usage
-           set attempt_count = attempt_count + 1,
+        update public.analysis_daily_usage as d
+           set attempt_count = d.attempt_count + 1,
                updated_at = now()
-         where usage_date = v_usage_date;
+         where d.usage_date = v_usage_date;
 
-        update public.analysis_user_usage
-           set attempt_count = attempt_count + 1,
+        update public.analysis_user_usage as u
+           set attempt_count = u.attempt_count + 1,
                updated_at = now()
-         where user_key = p_user_key;
+         where u.user_key = p_user_key;
 
         v_total_used := v_total_used + 1;
         v_daily_used := v_daily_used + 1;
