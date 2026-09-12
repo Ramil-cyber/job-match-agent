@@ -6,8 +6,8 @@ from pathlib import Path
 from agents import Runner
 from dotenv import load_dotenv
 
-from agent_core import build_analysis_request, create_job_match_agent
-from file_utils import PROJECT_ROOT, read_text_file
+from job_match_agent.agent_core import build_analysis_request, create_job_match_agent
+from job_match_agent.file_utils import PROJECT_ROOT, read_text_file
 
 # Load the API key from .env.
 load_dotenv()

@@ -1,8 +1,8 @@
 import unittest
 from pathlib import Path
 
-from pdf_utils import create_job_match_pdf
-from report_validation import validate_job_match_report
+from job_match_agent.pdf_utils import create_job_match_pdf
+from job_match_agent.report_validation import validate_job_match_report
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_REPORT_PATH = PROJECT_ROOT / "examples" / "sample_job_match_report.md"

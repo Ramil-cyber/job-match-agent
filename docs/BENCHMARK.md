@@ -55,7 +55,7 @@ covering strong, moderate, weak, ambiguous, and adversarial cases.
 Install the project dependencies, then run:
 
 ```bash
-python quality_benchmark.py
+python -m job_match_agent.quality_benchmark
 ```
 
 The script validates the saved OpenAI report, extracts its requirement

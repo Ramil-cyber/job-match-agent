@@ -3,9 +3,9 @@
 from agents import ModelSettings, RunConfig, Runner
 from openai import AsyncOpenAI
 
-from agent_core import build_analysis_request, create_job_match_agent
-from public_analysis import PublicAnalysisConfig
-from report_validation import validate_job_match_report
+from .agent_core import build_analysis_request, create_job_match_agent
+from .public_analysis import PublicAnalysisConfig
+from .report_validation import validate_job_match_report
 
 
 class PublicInputRejectedError(ValueError):

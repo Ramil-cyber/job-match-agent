@@ -4,8 +4,11 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
-from public_analysis import load_public_analysis_config
-from public_openai import PublicInputRejectedError, run_public_openai_analysis
+from job_match_agent.public_analysis import load_public_analysis_config
+from job_match_agent.public_openai import (
+    PublicInputRejectedError,
+    run_public_openai_analysis,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_REPORT = (PROJECT_ROOT / "examples" / "sample_job_match_report.md").read_text(
@@ -30,8 +33,8 @@ class PublicOpenAIWorkflowTests(unittest.TestCase):
         )
         self.moderation_client.close = AsyncMock()
 
-    @patch("public_openai.Runner.run", new_callable=AsyncMock)
-    @patch("public_openai.AsyncOpenAI")
+    @patch("job_match_agent.public_openai.Runner.run", new_callable=AsyncMock)
+    @patch("job_match_agent.public_openai.AsyncOpenAI")
     def test_safe_input_runs_one_constrained_analysis(
         self,
         mocked_openai_class,
@@ -69,8 +72,8 @@ class PublicOpenAIWorkflowTests(unittest.TestCase):
             "job_match_123",
         )
 
-    @patch("public_openai.Runner.run", new_callable=AsyncMock)
-    @patch("public_openai.AsyncOpenAI")
+    @patch("job_match_agent.public_openai.Runner.run", new_callable=AsyncMock)
+    @patch("job_match_agent.public_openai.AsyncOpenAI")
     def test_flagged_input_stops_before_paid_analysis(
         self,
         mocked_openai_class,
@@ -93,8 +96,8 @@ class PublicOpenAIWorkflowTests(unittest.TestCase):
 
         mocked_runner.assert_not_awaited()
 
-    @patch("public_openai.Runner.run", new_callable=AsyncMock)
-    @patch("public_openai.AsyncOpenAI")
+    @patch("job_match_agent.public_openai.Runner.run", new_callable=AsyncMock)
+    @patch("job_match_agent.public_openai.AsyncOpenAI")
     def test_invalid_report_is_rejected(
         self,
         mocked_openai_class,
@@ -113,8 +116,8 @@ class PublicOpenAIWorkflowTests(unittest.TestCase):
                 )
             )
 
-    @patch("public_openai.Runner.run", new_callable=AsyncMock)
-    @patch("public_openai.AsyncOpenAI")
+    @patch("job_match_agent.public_openai.Runner.run", new_callable=AsyncMock)
+    @patch("job_match_agent.public_openai.AsyncOpenAI")
     def test_missing_moderation_result_stops_before_paid_analysis(
         self,
         mocked_openai_class,

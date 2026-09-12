@@ -1,8 +1,7 @@
 from pathlib import Path
 
-
-# Identify the main project folder.
-PROJECT_ROOT = Path(__file__).resolve().parent
+# Identify the main project folder above this package.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def read_text_file(file_path: Path) -> str:

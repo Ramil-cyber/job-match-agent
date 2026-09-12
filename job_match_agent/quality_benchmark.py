@@ -6,10 +6,9 @@ a reproducible smoke test, not a general accuracy claim.
 
 from pathlib import Path
 
-from report_validation import validate_job_match_report
+from .report_validation import validate_job_match_report
 
-
-PROJECT_ROOT = Path(__file__).resolve().parent
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OPENAI_REPORT_PATH = PROJECT_ROOT / "examples" / "sample_job_match_report.md"
 
 EXPECTED_ASSESSMENTS = (
