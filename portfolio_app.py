@@ -4,8 +4,8 @@ from pathlib import Path
 import streamlit as st
 from dotenv import load_dotenv
 
-from pdf_utils import create_job_match_pdf
-from public_analysis import (
+from job_match_agent.pdf_utils import create_job_match_pdf
+from job_match_agent.public_analysis import (
     PublicAnalysisConfig,
     PublicAnalysisConfigurationError,
     QuotaDecision,
@@ -17,13 +17,16 @@ from public_analysis import (
     load_public_analysis_config,
     validate_public_inputs,
 )
-from public_openai import PublicInputRejectedError, run_public_openai_analysis
-from quality_benchmark import (
+from job_match_agent.public_openai import (
+    PublicInputRejectedError,
+    run_public_openai_analysis,
+)
+from job_match_agent.quality_benchmark import (
     EXPECTED_ASSESSMENTS,
     calculate_metrics,
     extract_assessments,
 )
-from report_validation import validate_job_match_report
+from job_match_agent.report_validation import validate_job_match_report
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 SAMPLE_RESUME_PATH = PROJECT_ROOT / "examples" / "sample_resume.txt"

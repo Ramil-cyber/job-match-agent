@@ -45,7 +45,7 @@ successfully reserve one attempt in the persistent quota database.
 `web_app.py` provides the separate private OpenAI-powered Streamlit experience.
 `app.py` provides the command-line version. Both remain available for owner use.
 
-`quality_benchmark.py` evaluates the saved OpenAI report against eight
+`job_match_agent/quality_benchmark.py` evaluates the saved OpenAI report against eight
 human-labeled expected qualification assessments without making another API
 call.
 
@@ -82,29 +82,21 @@ The project is designed to:
 
 ## Project Structure
 
-- `portfolio_app.py` - provides the public saved example and gated live interface.
-- `public_analysis.py` - validates settings, pseudonymizes users, and enforces quotas.
-- `public_openai.py` - screens and runs one constrained public OpenAI analysis.
-- `web_app.py` - provides the private live OpenAI Streamlit app.
-- `app.py` - runs the OpenAI-powered command-line application.
-- `agent_core.py` - contains the shared OpenAI agent configuration.
-- `agent_tools.py` - saves command-line reports.
-- `quality_benchmark.py` - evaluates the saved OpenAI example against human labels.
-- `BENCHMARK.md` - documents the evaluation method, results, and limitations.
-- `PUBLIC_DEPLOYMENT.md` - documents the fail-closed public rollout sequence.
-- `file_utils.py` - reads and writes project files.
-- `pdf_utils.py` - converts reports into formatted PDF data.
-- `report_validation.py` - validates report structure and completeness.
-- `quality_check.py` - checks the command-line report.
-- `database/quota_schema.sql` - creates atomic persistent quota functions.
-- `tests/` - contains automated benchmark, validator, and PDF tests.
-- `examples/` - contains fictional, public-safe sample inputs and output.
-- `data/` - contains private local inputs and is excluded from Git.
-- `outputs/` - contains generated command-line reports and is excluded from Git.
-- `.streamlit/secrets.example.toml` - shows safe cloud configuration placeholders.
-- `.env.example` - shows safe local configuration placeholders.
-- `.env` - stores the real API key locally and is excluded from Git.
-- `requirements.txt` - lists the required Python packages.
+- `portfolio_app.py` - public Streamlit entry point for the saved example and gated live interface.
+- `web_app.py` - private live OpenAI Streamlit entry point.
+- `app.py` - command-line entry point.
+- `job_match_agent/` - shared agent, public-analysis, validation, PDF, file, and benchmark modules.
+- `docs/` - benchmark methodology and protected-public-deployment guides.
+- `database/quota_schema.sql` - atomic persistent quota schema and functions.
+- `tests/` - automated application, quota, benchmark, validator, and PDF tests.
+- `examples/` - fictional, public-safe sample inputs and output.
+- `assets/` - public project imagery.
+- `data/` - private local inputs; excluded from Git.
+- `outputs/` - generated command-line reports; excluded from Git.
+- `.streamlit/secrets.example.toml` - safe cloud configuration placeholders.
+- `.env.example` - safe local configuration placeholders.
+- `.env` - real local API key; excluded from Git.
+- `requirements.txt` - Python dependencies.
 
 ## Installation
 
@@ -192,7 +184,7 @@ key value does not need to be placed in the repository or changed in the private
 app.
 
 Follow the complete fail-closed rollout sequence in
-[`PUBLIC_DEPLOYMENT.md`](PUBLIC_DEPLOYMENT.md).
+[`docs/PUBLIC_DEPLOYMENT.md`](docs/PUBLIC_DEPLOYMENT.md).
 
 ## Run the Private OpenAI App
 
@@ -237,7 +229,7 @@ outputs/job_match_report.md
 Check the saved report:
 
 ```bash
-python quality_check.py
+python -m job_match_agent.quality_check
 ```
 
 ## Reproduce the OpenAI Quality Benchmark
@@ -245,7 +237,7 @@ python quality_check.py
 Run:
 
 ```bash
-python quality_benchmark.py
+python -m job_match_agent.quality_benchmark
 ```
 
 The benchmark validates the saved OpenAI report and compares its eight
@@ -255,7 +247,7 @@ call.
 In the current fictional sample, the saved OpenAI report matched 8 of 8 expected
 labels, made zero false-positive qualification claims, and missed zero
 demonstrated matches. This is a one-scenario smoke test, not a general 100%
-accuracy claim. See [`BENCHMARK.md`](BENCHMARK.md) for details.
+accuracy claim. See [`docs/BENCHMARK.md`](docs/BENCHMARK.md) for details.
 
 ## Run Automated Tests
 

@@ -1,6 +1,6 @@
 from agents import function_tool
 
-from file_utils import PROJECT_ROOT, save_text_file
+from .file_utils import PROJECT_ROOT, save_text_file
 
 # Define the only location where the agent can save its report.
 REPORT_PATH = PROJECT_ROOT / "outputs" / "job_match_report.md"

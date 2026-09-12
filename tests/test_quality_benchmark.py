@@ -1,13 +1,12 @@
 import unittest
 from pathlib import Path
 
-from quality_benchmark import (
+from job_match_agent.quality_benchmark import (
     EXPECTED_ASSESSMENTS,
     calculate_metrics,
     extract_assessments,
     normalize_assessment,
 )
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 SAMPLE_REPORT_PATH = PROJECT_ROOT / "examples" / "sample_job_match_report.md"

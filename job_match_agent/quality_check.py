@@ -1,4 +1,4 @@
-from file_utils import PROJECT_ROOT, read_text_file
+from .file_utils import PROJECT_ROOT, read_text_file
 
 REPORT_PATH = PROJECT_ROOT / "outputs" / "job_match_report.md"
 

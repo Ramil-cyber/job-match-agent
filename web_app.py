@@ -4,10 +4,10 @@ import os
 import streamlit as st
 from agents import Runner
 from dotenv import load_dotenv
-from pdf_utils import create_job_match_pdf
-from report_validation import validate_job_match_report
 
-from agent_core import build_analysis_request, create_job_match_agent
+from job_match_agent.agent_core import build_analysis_request, create_job_match_agent
+from job_match_agent.pdf_utils import create_job_match_pdf
+from job_match_agent.report_validation import validate_job_match_report
 
 MAX_INPUT_CHARACTERS = 10_000
 

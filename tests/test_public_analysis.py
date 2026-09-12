@@ -3,7 +3,7 @@ import unittest
 from unittest.mock import patch
 from urllib.error import URLError
 
-from public_analysis import (
+from job_match_agent.public_analysis import (
     PublicAnalysisConfigurationError,
     QuotaServiceError,
     SupabaseQuotaClient,
@@ -241,7 +241,7 @@ class SupabaseQuotaClientTests(unittest.TestCase):
                 secret_key="test-key",
             )
 
-    @patch("public_analysis._HTTPS_OPENER.open")
+    @patch("job_match_agent.public_analysis._HTTPS_OPENER.open")
     def test_read_quota_parses_valid_response(self, mocked_urlopen):
         mocked_urlopen.return_value = FakeResponse(
             [
@@ -282,7 +282,7 @@ class SupabaseQuotaClientTests(unittest.TestCase):
             request.data.decode("utf-8"),
         )
 
-    @patch("public_analysis._HTTPS_OPENER.open")
+    @patch("job_match_agent.public_analysis._HTTPS_OPENER.open")
     def test_invalid_denial_response_fails_closed(self, mocked_urlopen):
         mocked_urlopen.return_value = FakeResponse(
             [
@@ -304,7 +304,7 @@ class SupabaseQuotaClientTests(unittest.TestCase):
         with self.assertRaises(QuotaServiceError):
             client.read_quota(user_key=self.user_key, config=self.config)
 
-    @patch("public_analysis._HTTPS_OPENER.open")
+    @patch("job_match_agent.public_analysis._HTTPS_OPENER.open")
     def test_valid_user_limit_response_is_denied(self, mocked_urlopen):
         mocked_urlopen.return_value = FakeResponse(
             [
@@ -331,7 +331,7 @@ class SupabaseQuotaClientTests(unittest.TestCase):
         self.assertFalse(decision.allowed)
         self.assertEqual(decision.user_remaining, 0)
 
-    @patch("public_analysis._HTTPS_OPENER.open")
+    @patch("job_match_agent.public_analysis._HTTPS_OPENER.open")
     def test_final_allowed_reservation_is_accepted(self, mocked_urlopen):
         mocked_urlopen.return_value = FakeResponse(
             [
@@ -358,7 +358,7 @@ class SupabaseQuotaClientTests(unittest.TestCase):
         self.assertTrue(decision.allowed)
         self.assertEqual(decision.user_remaining, 0)
 
-    @patch("public_analysis._HTTPS_OPENER.open")
+    @patch("job_match_agent.public_analysis._HTTPS_OPENER.open")
     def test_full_read_response_cannot_claim_an_attempt_is_available(
         self,
         mocked_urlopen,
@@ -384,7 +384,7 @@ class SupabaseQuotaClientTests(unittest.TestCase):
             client.read_quota(user_key=self.user_key, config=self.config)
 
     @patch(
-        "public_analysis._HTTPS_OPENER.open",
+        "job_match_agent.public_analysis._HTTPS_OPENER.open",
         side_effect=URLError("offline"),
     )
     def test_network_failure_fails_closed(self, mocked_urlopen):

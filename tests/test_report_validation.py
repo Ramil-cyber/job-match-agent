@@ -2,7 +2,7 @@ import re
 import unittest
 from pathlib import Path
 
-from report_validation import validate_job_match_report
+from job_match_agent.report_validation import validate_job_match_report
 
 SAMPLE_REPORT_PATH = (
     Path(__file__).resolve().parents[1] / "examples" / "sample_job_match_report.md"
