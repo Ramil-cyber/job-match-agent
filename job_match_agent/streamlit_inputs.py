@@ -57,7 +57,12 @@ def render_document_input(
         f"{label} input method",
         (PASTE_METHOD, UPLOAD_METHOD),
         horizontal=True,
+        captions=(
+            "Type or paste editable text.",
+            f"PDF, DOCX, or TXT · {MAX_UPLOAD_SIZE_MB} MB maximum.",
+        ),
         key=f"{key_prefix}_method",
+        width="stretch",
     )
 
     if method == PASTE_METHOD:

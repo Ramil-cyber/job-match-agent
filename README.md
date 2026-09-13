@@ -7,6 +7,8 @@
 Job Match Agent uses OpenAI to compare a resume with a job description and
 produce a structured, evidence-based match report. Users can paste text or
 upload PDF, DOCX, and UTF-8 TXT documents for editable in-memory extraction.
+Its responsive Streamlit interface uses a shared visual system across the
+public portfolio and private analyzer.
 
 ## Documentation
 
@@ -44,6 +46,23 @@ The OpenAI agent:
 9. Applies persistent per-account, daily, and overall public usage limits.
 10. Accepts pasted text or extracts editable text from PDF, DOCX, and UTF-8 TXT
     uploads.
+11. Uses responsive two-column document inputs that stack on smaller screens.
+12. Applies consistent visual hierarchy, keyboard focus, contrast, and
+    reduced-motion behavior across both Streamlit experiences.
+
+## Interface Design
+
+Phase 6 introduces a shared dark visual system with deep navy surfaces and
+teal/cyan accents. Both Streamlit apps now use the same hero, section headings,
+workflow cards, responsive spacing, form panels, status metrics, report
+containers, and footer. The public workflow still performs authentication and
+quota checks before rendering the live form; the redesign changes presentation,
+not the security boundary.
+
+Theme tokens live in `.streamlit/config.toml`, while reusable static UI helpers
+and escaped HTML builders live in `job_match_agent/streamlit_ui.py`. The layout
+retains visible keyboard focus and disables nonessential transitions when a
+visitor requests reduced motion.
 
 ## OpenAI Analysis Workflow
 
@@ -98,7 +117,7 @@ The project is designed to:
 - `web_app.py` - private live OpenAI Streamlit entry point.
 - `app.py` - command-line entry point.
 - `job_match_agent/` - shared agent, document extraction, public-analysis,
-  validation, PDF, file, and benchmark modules.
+  validation, PDF, file, benchmark, and Streamlit UI modules.
 - `docs/` - technical, deployment, and benchmark documentation in Markdown and PDF.
 - `database/quota_schema.sql` - atomic persistent quota schema and functions.
 - `tests/` - automated application, quota, benchmark, validator, and PDF tests.
@@ -107,6 +126,7 @@ The project is designed to:
 - `data/` - private local inputs; excluded from Git.
 - `outputs/` - generated command-line reports; excluded from Git.
 - `.streamlit/secrets.example.toml` - safe cloud configuration placeholders.
+- `.streamlit/config.toml` - version-controlled visual theme tokens.
 - `.env.example` - safe local configuration placeholders.
 - `.env` - real local API key; excluded from Git.
 - `requirements.txt` - Python dependencies.
@@ -223,7 +243,7 @@ python -m streamlit run web_app.py
 ```
 
 Paste text or upload a PDF, DOCX, or UTF-8 TXT resume and job description, then
-review the extracted text and select **Analyze Match**. Opening the page or
+review the extracted text and select **Analyze job match**. Opening the page or
 extracting a document does not call OpenAI, but each successful analysis creates
 one paid API run.
 
@@ -272,7 +292,7 @@ Run all tests:
 python -m unittest discover -s tests -v
 ```
 
-The current suite contains 69 tests. They confirm that:
+The current suite contains 75 tests. They confirm that:
 
 - Complete reports pass validation
 - Incomplete or incorrectly structured reports are rejected
@@ -290,6 +310,8 @@ The current suite contains 69 tests. They confirm that:
 - Public inputs, output size, and agent turns are constrained
 - Safety screening stops flagged text before paid generation
 - Database functions use row locks for atomic limits
+- Shared interface markup escapes dynamic text and retains focus and
+  reduced-motion accessibility rules
 
 ## Privacy and Cost
 

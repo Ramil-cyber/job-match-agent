@@ -140,6 +140,23 @@ Use this order:
 Only after these checks pass should Google sign-in be opened beyond the owner's
 test account.
 
+### Visual and accessibility smoke check
+
+After each Streamlit deployment, also verify that:
+
+- The hero, status notice, tabs, and report content remain readable on desktop
+  and at a narrow browser width.
+- Resume and job-description panels appear side by side when space permits and
+  stack without clipping on smaller screens.
+- Long report tables and tab labels can scroll horizontally when necessary.
+- Keyboard focus is visible on tabs, input choices, uploads, confirmation,
+  analysis, and download controls.
+- The saved example remains usable when live analysis is disabled.
+
+The version-controlled `.streamlit/config.toml` contains visual theme values
+only. Real deployment credentials continue to belong exclusively in Streamlit
+Community Cloud secrets.
+
 ## Stored Data
 
 The quota database stores:

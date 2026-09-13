@@ -29,6 +29,13 @@ class PrivateWebAppTests(unittest.TestCase):
             ["Resume", "Job Description"],
         )
         self.assertTrue(all(field.max_chars == 10_000 for field in app.text_area))
+        self.assertEqual(app.button[0].label, "Analyze job match")
+        self.assertTrue(
+            any(
+                "Turn role requirements into" in element.value
+                for element in app.markdown
+            )
+        )
 
     def test_upload_choice_displays_file_uploader(self):
         app = self.build_app()

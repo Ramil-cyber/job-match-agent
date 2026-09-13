@@ -5,7 +5,7 @@
 Last verified: September 13, 2026
 
 Architecture baseline: `v3.0.0` plus subsequent organization, documentation,
-and Phase 6 document-input work
+and Phase 6 document-input and visual-design work
 
 Repository: [Ramil-cyber/job-match-agent](https://github.com/Ramil-cyber/job-match-agent)
 
@@ -25,8 +25,8 @@ The guide has four goals:
 1. Give reviewers a clear view of the architecture and engineering decisions.
 2. Provide developers with reproducible local setup and testing instructions.
 3. Record the security and cost controls required for limited public analysis.
-4. Document the Phase 6 document-input foundation and the invariants future
-   interface work must preserve.
+4. Document the Phase 6 document-input and responsive design system while
+   recording the technical invariants future interface work must preserve.
 
 The README remains the concise project landing page. This document contains the
 deeper implementation and operations detail. Two focused companion documents
@@ -52,7 +52,8 @@ remain available:
 | Default public limits | 3 per account, 10 per UTC day, 100 total |
 | Supported live input | Pasted text or PDF, DOCX, and UTF-8 TXT extraction |
 | Document limits | 5 MB upload and 10,000 extracted characters per input |
-| Automated validation | 69 tests plus an 8-requirement saved-report benchmark |
+| Interface system | Shared dark theme, responsive layouts, escaped static markup, accessible focus and reduced-motion rules |
+| Automated validation | 75 tests plus an 8-requirement saved-report benchmark |
 | Default feature state | Public live analysis disabled until explicitly enabled |
 
 ## 2. System scope
@@ -103,6 +104,7 @@ feature-gated path.
 | `job_match_agent/public_openai.py` | Performs moderation and one constrained public agent run. |
 | `job_match_agent/document_extraction.py` | Validates supported uploads and extracts normalized text entirely in memory. |
 | `job_match_agent/streamlit_inputs.py` | Renders reusable paste/upload controls, editable previews, and character counts. |
+| `job_match_agent/streamlit_ui.py` | Defines shared heroes, section headers, workflow cards, feature cards, footer markup, and responsive CSS. |
 | `job_match_agent/report_validation.py` | Rejects missing, duplicate, empty, or incorrectly ordered report sections and malformed report output. |
 | `job_match_agent/pdf_utils.py` | Converts a validated Markdown report to downloadable PDF bytes. |
 | `job_match_agent/file_utils.py` | Reads local inputs and writes command-line output beneath the repository root. |
@@ -215,13 +217,33 @@ The uploader also applies a 5 MB source-file limit. Normalized extracted text
 must fit the corresponding 10,000-character input limit. The source bytes are
 held only in the active Streamlit process; the app does not create a local file,
 database row, log entry, or repository artifact from an upload. Users review and
-may edit the extracted text before selecting **Analyze Match**.
+may edit the extracted text before selecting **Analyze job match**.
 
 File extension filters improve the interface but are not treated as a security
 boundary. The extraction layer independently checks content signatures and
 container structure. Legacy `.doc`, scanned/image-only PDF, password-protected
 PDF, unsupported extensions, damaged files, and oversized documents fail before
 quota reservation or OpenAI processing.
+
+### 4.6 Responsive interface flow
+
+The public and private Streamlit entry points share the presentation layer in
+`job_match_agent/streamlit_ui.py`. It provides the product hero, section
+headings, three-step workflow cards, explanatory feature cards, footer, and the
+CSS used to style native Streamlit controls. `.streamlit/config.toml` supplies
+the matching dark theme tokens without containing credentials.
+
+On larger screens, resume and job-description panels appear side by side so a
+user can compare both sources while preparing an analysis. Streamlit stacks the
+panels on narrower screens, and custom grid components switch to a single-column
+layout below 760 pixels. Tables and tab navigation retain horizontal scrolling
+where necessary rather than clipping content.
+
+Static HTML builders escape all supplied labels and descriptions before
+rendering. The stylesheet retains a visible keyboard-focus outline and honors
+the operating system's reduced-motion preference. These presentation helpers do
+not receive resume text, job-description text, identity claims, quota secrets,
+or API credentials.
 
 ## 5. OpenAI agent and output contract
 
@@ -450,14 +472,14 @@ job-match-agent/
 ├── app.py                         # Command-line entry point
 ├── portfolio_app.py               # Public Streamlit entry point
 ├── web_app.py                     # Private Streamlit entry point
-├── job_match_agent/               # Shared Python implementation
+├── job_match_agent/               # Shared Python implementation and UI layer
 ├── database/quota_schema.sql      # Supabase quota schema and functions
 ├── docs/                          # Technical, deployment, and benchmark guides
 ├── examples/                      # Fictional public-safe inputs and report
 ├── assets/                        # README and architecture visuals
 ├── scripts/                       # Reproducible documentation utilities
 ├── tests/                         # Automated test suite
-├── .streamlit/                    # Safe example configuration only
+├── .streamlit/                    # Public theme and safe secret template
 ├── README.md
 └── requirements.txt
 ```
@@ -541,7 +563,7 @@ Expected result: no output.
 python -m unittest discover -s tests -v
 ```
 
-The current verified result is 69 passing tests. The suite covers:
+The current verified result is 75 passing tests. The suite covers:
 
 - PDF creation and empty-input rejection.
 - PDF, DOCX, and TXT extraction, including paragraph and table content.
@@ -554,6 +576,8 @@ The current verified result is 69 passing tests. The suite covers:
 - Benchmark classification and error metrics.
 - SQL row locking, privilege restrictions, and ambiguity regression checks.
 - Report headings, ordering, content, table, and interview-question validation.
+- Shared UI markup escaping, theme tokens, visible focus treatment, and
+  reduced-motion behavior.
 
 Mocks are used for OpenAI and Supabase unit tests, so the automated suite makes
 no paid API request.
@@ -584,8 +608,10 @@ Before merging a change that affects the interface or integrations:
 4. Start the private app and verify the form without submitting a paid request.
 5. If the public workflow changed, enable it temporarily with safe local
    settings and test validation before any intentional live call.
-6. Re-disable the local public feature after testing.
-7. Scan staged changes for secret patterns and confirm private paths are not
+6. Check the hero, tabs, input panels, tables, and download controls at desktop
+   and narrow browser widths; verify visible keyboard focus.
+7. Re-disable the local public feature after testing.
+8. Scan staged changes for secret patterns and confirm private paths are not
    tracked.
 
 ## 13. Deployment and release process
@@ -710,6 +736,9 @@ The current architecture was built incrementally:
    long-form guides into `docs/` while keeping all entry points stable.
 8. **Phase 6 document-input foundation:** added paste/upload selection, in-memory
    PDF/DOCX/TXT extraction, editable previews, and 10,000-character limits.
+9. **Phase 6 visual system:** added shared theme tokens, responsive two-column
+   inputs, product and section hierarchy, workflow and feature cards, improved
+   report presentation, keyboard focus, and reduced-motion behavior.
 
 The stable `v3.0.0` release records the protected public OpenAI milestone. Later
 organization and documentation commits improve maintainability without changing
@@ -733,11 +762,20 @@ the core analysis contract.
 - AI-generated guidance requires human review and must not determine employment
   decisions automatically.
 
-## 17. Phase 6 UI/UX engineering boundaries
+## 17. Phase 6 UI/UX implementation and boundaries
 
-Phase 6 can redesign layout, navigation, typography, responsive behavior,
-status messages, report presentation, and accessibility. It should preserve
-these technical invariants:
+Phase 6 now provides one visual language across the two Streamlit entry points.
+The public portfolio uses a product-oriented hero, clear saved/live states,
+responsive status metrics, and improved sample and benchmark presentation. The
+private analyzer uses the same foundation with copy tailored to the owner-only
+workflow. Both apps present the resume and role in balanced panels, followed by
+one explicit review-and-analysis action.
+
+The design system is intentionally implemented with Streamlit primitives plus
+small, static, escaped HTML components. This keeps forms, authentication,
+uploads, buttons, alerts, metrics, downloads, and tabs accessible to Streamlit's
+runtime while avoiding a second frontend framework. The implementation
+preserves these technical invariants:
 
 - `portfolio_app.py` and `web_app.py` remain the deployed root entry points
   unless both Streamlit deployments are deliberately reconfigured.
@@ -752,7 +790,7 @@ these technical invariants:
   server files.
 - Saved fictional content remains available without sign-in or API cost.
 - Private app access restrictions remain separate from public-app login.
-- The 69-test suite and benchmark remain green.
+- The 75-test suite and benchmark remain green.
 
 These boundaries allow the visual experience to improve without weakening the
 security, privacy, cost, or truthfulness controls already verified.
