@@ -7,6 +7,13 @@
 Job Match Agent uses OpenAI to compare a resume with a job description and
 produce a structured, evidence-based match report.
 
+## Documentation
+
+- [Technical Guide — Markdown](docs/TECHNICAL_GUIDE.md)
+- [Technical Guide — PDF](docs/Job_Match_Agent_Technical_Guide.pdf)
+- [Protected Public Deployment Guide](docs/PUBLIC_DEPLOYMENT.md)
+- [OpenAI Quality Benchmark](docs/BENCHMARK.md)
+
 ## Live Public Portfolio
 
 [![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ramil-job-match-demo.streamlit.app/)
@@ -86,7 +93,7 @@ The project is designed to:
 - `web_app.py` - private live OpenAI Streamlit entry point.
 - `app.py` - command-line entry point.
 - `job_match_agent/` - shared agent, public-analysis, validation, PDF, file, and benchmark modules.
-- `docs/` - benchmark methodology and protected-public-deployment guides.
+- `docs/` - technical, deployment, and benchmark documentation in Markdown and PDF.
 - `database/quota_schema.sql` - atomic persistent quota schema and functions.
 - `tests/` - automated application, quota, benchmark, validator, and PDF tests.
 - `examples/` - fictional, public-safe sample inputs and output.
