@@ -5,7 +5,8 @@
 ## Project Overview
 
 Job Match Agent uses OpenAI to compare a resume with a job description and
-produce a structured, evidence-based match report.
+produce a structured, evidence-based match report. Users can paste text or
+upload PDF, DOCX, and UTF-8 TXT documents for editable in-memory extraction.
 
 ## Documentation
 
@@ -26,7 +27,7 @@ persistent usage limits, input constraints, and server-side secrets.
 
 The live public feature is disabled by default in the repository and fails
 closed if authentication, quota storage, or any required secret is unavailable.
-The original OpenAI Streamlit deployment remains private and unchanged.
+The separate OpenAI Streamlit deployment remains private and access-restricted.
 
 ## Features
 
@@ -41,6 +42,8 @@ The OpenAI agent:
 7. Provides PDF and Markdown downloads.
 8. Screens public submissions before running the paid analysis.
 9. Applies persistent per-account, daily, and overall public usage limits.
+10. Accepts pasted text or extracts editable text from PDF, DOCX, and UTF-8 TXT
+    uploads.
 
 ## OpenAI Analysis Workflow
 
@@ -83,6 +86,8 @@ The project is designed to:
 - Store only a pseudonymous user identifier in the quota database
 - Enforce per-account, shared daily, and overall limits atomically
 - Stop safely without calling OpenAI if the quota service is unavailable
+- Process supported uploads in memory without saving the source files
+- Reject encrypted, corrupt, unsupported, scanned-only, or oversized documents
 - Constrain public input length, output tokens, and model turns
 - Disable sensitive agent tracing for public submissions
 - Send a pseudonymous safety identifier with each public generation
@@ -92,7 +97,8 @@ The project is designed to:
 - `portfolio_app.py` - public Streamlit entry point for the saved example and gated live interface.
 - `web_app.py` - private live OpenAI Streamlit entry point.
 - `app.py` - command-line entry point.
-- `job_match_agent/` - shared agent, public-analysis, validation, PDF, file, and benchmark modules.
+- `job_match_agent/` - shared agent, document extraction, public-analysis,
+  validation, PDF, file, and benchmark modules.
 - `docs/` - technical, deployment, and benchmark documentation in Markdown and PDF.
 - `database/quota_schema.sql` - atomic persistent quota schema and functions.
 - `tests/` - automated application, quota, benchmark, validator, and PDF tests.
@@ -171,7 +177,8 @@ The default limits are:
 - 3 attempts for each verified account
 - 10 attempts shared across all users per UTC day
 - 100 attempts across the lifetime of the public demonstration
-- 8,000 characters for each submitted document
+- 10,000 characters for each submitted document
+- 5 MB for each PDF, DOCX, or UTF-8 TXT upload
 - 3,000 maximum output tokens and one agent turn per analysis
 
 The counters represent reserved API attempts. An attempt is counted before the
@@ -215,9 +222,10 @@ Start the private app:
 python -m streamlit run web_app.py
 ```
 
-Paste a resume and job description, then select **Analyze Match**. Opening the
-page does not call OpenAI, but each successful analysis creates one paid API
-run.
+Paste text or upload a PDF, DOCX, or UTF-8 TXT resume and job description, then
+review the extracted text and select **Analyze Match**. Opening the page or
+extracting a document does not call OpenAI, but each successful analysis creates
+one paid API run.
 
 ## Run the Command-Line Application
 
@@ -264,7 +272,7 @@ Run all tests:
 python -m unittest discover -s tests -v
 ```
 
-The tests confirm that:
+The current suite contains 69 tests. They confirm that:
 
 - Complete reports pass validation
 - Incomplete or incorrectly structured reports are rejected
@@ -272,6 +280,9 @@ The tests confirm that:
 - Benchmark metrics count incorrect and unsupported qualification claims
 - PDF generation returns valid PDF data
 - Empty report and PDF inputs are rejected
+- PDF, DOCX, and UTF-8 TXT uploads extract expected text in memory
+- Encrypted, corrupt, disguised, macro-enabled, oversized, and scanned-only
+  documents are rejected before analysis
 - Public live analysis is disabled by default
 - Missing authentication or quota configuration fails closed
 - User identifiers are pseudonymized before storage or API use
@@ -286,9 +297,11 @@ The saved-example sections read only the fictional files committed in the
 `examples/` directory and make no API call.
 
 The optional public live section requires sign-in and asks users to submit only
-fictional or redacted text. The app does not persist submitted resume text, job
-descriptions, or generated reports. The quota database stores a salted,
-pseudonymous account key and counters, not the user's email or documents.
+fictional or redacted content. Supported uploads are parsed in memory and are
+not written to the repository, local disk, or quota database. The app does not
+persist submitted resume text, job descriptions, or generated reports. The
+quota database stores a salted, pseudonymous account key and counters, not the
+user's email or documents.
 
 Each accepted public submission reserves one quota attempt, runs OpenAI safety
 screening, and can make at most one paid report-generation request. API and
@@ -309,8 +322,10 @@ from Git.
 - The public feature depends on Google OpenID Connect, Supabase, Streamlit
   Community Cloud, and OpenAI availability.
 - The project analyzes one resume and one job description at a time.
-- The live interface accepts pasted text rather than directly parsing PDF or
-  Word files.
+- Upload extraction supports PDF, DOCX, and UTF-8 TXT, but not legacy `.doc`,
+  rich-text, image-only, or password-protected files.
+- PDF extraction does not perform OCR; scanned documents must first be converted
+  to searchable text or pasted manually.
 - The quality benchmark currently contains one labeled fictional scenario.
 - All results require human verification and must not be used as automated
   hiring decisions.

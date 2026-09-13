@@ -2,9 +2,10 @@
 
 **Architecture, security, deployment, testing, and operations**
 
-Last verified: September 12, 2026
+Last verified: September 13, 2026
 
-Architecture baseline: `v3.0.0` and the subsequent repository organization
+Architecture baseline: `v3.0.0` plus subsequent organization, documentation,
+and Phase 6 document-input work
 
 Repository: [Ramil-cyber/job-match-agent](https://github.com/Ramil-cyber/job-match-agent)
 
@@ -24,7 +25,8 @@ The guide has four goals:
 1. Give reviewers a clear view of the architecture and engineering decisions.
 2. Provide developers with reproducible local setup and testing instructions.
 3. Record the security and cost controls required for limited public analysis.
-4. Establish a stable technical baseline before Phase 6 changes the interface.
+4. Document the Phase 6 document-input foundation and the invariants future
+   interface work must preserve.
 
 The README remains the concise project landing page. This document contains the
 deeper implementation and operations detail. Two focused companion documents
@@ -48,7 +50,9 @@ remain available:
 | Authentication | Google OpenID Connect through Streamlit authentication |
 | Persistent quota service | Dedicated Supabase PostgreSQL project and RPC functions |
 | Default public limits | 3 per account, 10 per UTC day, 100 total |
-| Automated validation | 49 tests plus an 8-requirement saved-report benchmark |
+| Supported live input | Pasted text or PDF, DOCX, and UTF-8 TXT extraction |
+| Document limits | 5 MB upload and 10,000 extracted characters per input |
+| Automated validation | 69 tests plus an 8-requirement saved-report benchmark |
 | Default feature state | Public live analysis disabled until explicitly enabled |
 
 ## 2. System scope
@@ -75,8 +79,8 @@ The same analysis contract is exposed through three entry points:
 
 | Interface | Audience | Input | Output | Persistence |
 |---|---|---|---|---|
-| Public portfolio | Visitors and verified public users | Saved fictional example or pasted redacted text | On-page report, PDF, Markdown | Live report stays in the active Streamlit session |
-| Private Streamlit app | Repository owner or explicitly authorized users | Pasted text | On-page report, PDF, Markdown | Report stays in the active Streamlit session |
+| Public portfolio | Visitors and verified public users | Saved example, pasted text, or PDF/DOCX/TXT upload | On-page report, PDF, Markdown | Input and live report stay in the active Streamlit session |
+| Private Streamlit app | Repository owner or explicitly authorized users | Pasted text or PDF/DOCX/TXT upload | On-page report, PDF, Markdown | Input and report stay in the active Streamlit session |
 | Command line | Local owner/developer | Text files | Terminal confirmation and Markdown file | Saves to ignored `outputs/` directory |
 
 The public portfolio is useful without a paid API request because the fictional
@@ -97,6 +101,8 @@ feature-gated path.
 | `job_match_agent/agent_core.py` | Defines the model, evidence rules, required report structure, and web/CLI delivery instructions. |
 | `job_match_agent/public_analysis.py` | Validates public configuration and inputs, pseudonymizes identities, and calls the quota service. |
 | `job_match_agent/public_openai.py` | Performs moderation and one constrained public agent run. |
+| `job_match_agent/document_extraction.py` | Validates supported uploads and extracts normalized text entirely in memory. |
+| `job_match_agent/streamlit_inputs.py` | Renders reusable paste/upload controls, editable previews, and character counts. |
 | `job_match_agent/report_validation.py` | Rejects missing, duplicate, empty, or incorrectly ordered report sections and malformed report output. |
 | `job_match_agent/pdf_utils.py` | Converts a validated Markdown report to downloadable PDF bytes. |
 | `job_match_agent/file_utils.py` | Reads local inputs and writes command-line output beneath the repository root. |
@@ -147,16 +153,19 @@ The protected paid path follows this order:
    issuer and subject with the private `USER_HASH_SALT`.
 6. **Read the quota.** The server calls Supabase's protected read RPC and shows
    remaining per-account attempts.
-7. **Validate the form.** Both text fields, minimum and maximum lengths, and the
-   privacy confirmation must pass before reservation.
-8. **Reserve one attempt atomically.** Supabase locks the relevant rows, checks
+7. **Collect document text.** Each input independently accepts pasted text or a
+   PDF, DOCX, or UTF-8 TXT upload. Uploads are validated and extracted in memory,
+   then displayed as editable text.
+8. **Validate the inputs.** Both documents, minimum and maximum lengths, upload
+   status, and the privacy confirmation must pass before reservation.
+9. **Reserve one attempt atomically.** Supabase locks the relevant rows, checks
    all three limits, and increments all counters in one transaction.
-9. **Screen the text.** OpenAI moderation checks the combined resume and job
+10. **Screen the text.** OpenAI moderation checks the combined resume and job
    description. Flagged text stops before generation.
-10. **Run one agent turn.** The agent receives a maximum output-token limit,
+11. **Run one agent turn.** The agent receives a maximum output-token limit,
     disabled sensitive tracing, `store=False`, and the pseudonymous safety ID.
-11. **Validate the report.** Invalid or incomplete output is rejected.
-12. **Render the result.** The report is kept in session state and offered as
+12. **Validate the report.** Invalid or incomplete output is rejected.
+13. **Render the result.** The report is kept in session state and offered as
     on-page Markdown plus PDF and Markdown downloads.
 
 The quota is deliberately reserved before any OpenAI request. If moderation,
@@ -167,11 +176,13 @@ used to bypass cost limits.
 ### 4.3 Private Streamlit workflow
 
 1. `web_app.py` loads the local/server OpenAI key.
-2. The owner pastes a resume and job description.
-3. Empty input is rejected before any request.
-4. The shared agent runs without the file-saving tool.
-5. The returned report passes the same structural validator.
-6. The report remains in Streamlit session state and can be downloaded as PDF
+2. The owner pastes text or uploads a supported resume and job description.
+3. Uploaded content is extracted in memory and shown as editable text.
+4. Empty, invalid, unsupported, or oversized input is rejected before any
+   request.
+5. The shared agent runs without the file-saving tool.
+6. The returned report passes the same structural validator.
+7. The report remains in Streamlit session state and can be downloaded as PDF
    or Markdown.
 
 The separate private deployment remains access-restricted at the Streamlit
@@ -188,6 +199,29 @@ deployment restriction.
 5. `python -m job_match_agent.quality_check` can validate the saved result.
 
 The `data/` and `outputs/` directories are ignored by Git.
+
+### 4.5 Uploaded-document processing
+
+The two Streamlit interfaces share one extraction layer. Resume and job inputs
+remain independent, so users can paste one document and upload the other.
+
+| Format | Validation and extraction behavior |
+|---|---|
+| PDF | Confirms a PDF signature, rejects encryption, caps page count, and extracts text with `pypdf`. No OCR is attempted. |
+| DOCX | Confirms the Office archive structure, rejects macros and suspicious expansion, and extracts paragraphs plus table cells with `python-docx`. |
+| TXT | Requires UTF-8 text, permits a UTF-8 byte-order mark, and rejects binary-looking null bytes. |
+
+The uploader also applies a 5 MB source-file limit. Normalized extracted text
+must fit the corresponding 10,000-character input limit. The source bytes are
+held only in the active Streamlit process; the app does not create a local file,
+database row, log entry, or repository artifact from an upload. Users review and
+may edit the extracted text before selecting **Analyze Match**.
+
+File extension filters improve the interface but are not treated as a security
+boundary. The extraction layer independently checks content signatures and
+container structure. Legacy `.doc`, scanned/image-only PDF, password-protected
+PDF, unsupported extensions, damaged files, and oversized documents fail before
+quota reservation or OpenAI processing.
 
 ## 5. OpenAI agent and output contract
 
@@ -278,8 +312,10 @@ safety identifier. The hashing salt never leaves the server.
 | Attempts per verified account | 3 total | `PUBLIC_ANALYSIS_USER_LIMIT` |
 | Shared attempts | 10 per UTC day | `PUBLIC_ANALYSIS_DAILY_LIMIT` |
 | Public demonstration allowance | 100 total | `PUBLIC_ANALYSIS_TOTAL_LIMIT` |
-| Resume length | 8,000 characters | `PUBLIC_MAX_RESUME_CHARACTERS` |
-| Job-description length | 8,000 characters | `PUBLIC_MAX_JOB_CHARACTERS` |
+| Resume length | 10,000 characters | `PUBLIC_MAX_RESUME_CHARACTERS` |
+| Job-description length | 10,000 characters | `PUBLIC_MAX_JOB_CHARACTERS` |
+| Uploaded source file | 5 MB | Fixed extraction constant |
+| PDF pages | 40 | Fixed extraction constant |
 | Minimum document length | 100 characters | Fixed validation constant |
 | Generation output | 3,000 tokens | `PUBLIC_MAX_OUTPUT_TOKENS` |
 | Agent turns | 1 | Fixed public run constraint |
@@ -338,6 +374,9 @@ The Python client additionally:
 | Traffic spike across accounts | Shared UTC-day and lifetime quotas | Reservation is denied before OpenAI. |
 | Concurrent quota race | PostgreSQL row locks and atomic function | Counts cannot pass the configured limit through parallel reservations. |
 | Oversized or empty documents | Server-side length validation | Request is rejected before reservation or OpenAI. |
+| Malformed or disguised uploads | Extension plus content/structure checks | Extraction stops with a public-safe message before reservation. |
+| Archive expansion or macros | DOCX archive limits and macro rejection | Suspicious Word files are rejected before parsing. |
+| Scanned or encrypted PDF | Text and encryption checks | The user is directed to OCR, remove protection, or paste text. |
 | Unsafe submitted text | OpenAI moderation | Generation does not run for flagged text. |
 | Prompt instructions inside documents | Agent instruction hierarchy and document delimiters | Documents are treated as data, not commands. |
 | Unexpected model output | Structural report validator | Report is not displayed or downloaded. |
@@ -350,6 +389,7 @@ The Python client additionally:
 | Data | Location | Retention by this application |
 |---|---|---|
 | Fictional sample files | GitHub repository | Version-controlled intentionally |
+| Uploaded PDF, DOCX, or TXT bytes | Streamlit process during extraction | In memory only; not written by the app |
 | Live resume and job text | Streamlit process and OpenAI request | Active session only; not written by the app |
 | Generated live report | Streamlit session state | Active session only; user may download it |
 | Google issuer and subject | Authentication session | Used to derive the pseudonymous key; not stored in Supabase |
@@ -358,8 +398,9 @@ The Python client additionally:
 | Secrets | Local `.env`, ignored `secrets.toml`, or Streamlit secrets | Never committed to Git |
 
 Users are instructed to remove sensitive personal information and use
-fictional or redacted text in the public demo. Submitted text is still sent to
-OpenAI for processing and is subject to the applicable API data-handling terms.
+fictional or redacted content in the public demo. Source uploads are not sent as
+files; their reviewed extracted text is sent to OpenAI for processing and is
+subject to the applicable API data-handling terms.
 
 ### 8.3 Independent cost ceiling
 
@@ -500,9 +541,12 @@ Expected result: no output.
 python -m unittest discover -s tests -v
 ```
 
-The current verified result is 49 passing tests. The suite covers:
+The current verified result is 69 passing tests. The suite covers:
 
 - PDF creation and empty-input rejection.
+- PDF, DOCX, and TXT extraction, including paragraph and table content.
+- Upload signature, encryption, page, archive, macro, size, and character-limit
+  rejection.
 - Saved portfolio rendering and feature-gate behavior.
 - Public configuration, authentication, identity, and input validation.
 - Supabase read/reservation parsing and fail-closed network behavior.
@@ -639,6 +683,8 @@ terminal transcript, or generated report.
 | Live tab is absent | Feature is disabled or configuration failed closed | Check the flag and configuration names without displaying values. |
 | Sign-in callback fails | Redirect URI mismatch | Compare the exact local/cloud callback with Google and Streamlit settings. |
 | Usage-limit service unavailable | Supabase URL, secret, network, function, or schema issue | Keep the feature disabled; test the quota RPC separately. |
+| Uploaded PDF has no readable text | It is scanned or image-only | Run OCR first or paste searchable text. |
+| DOCX upload is rejected | It is damaged, macro-enabled, suspiciously compressed, or actually a legacy `.doc` file | Save a clean `.docx`, PDF, or UTF-8 TXT copy and retry. |
 | Report is rejected | Model output failed the structural contract | Inspect non-sensitive logs and validator tests; do not bypass validation. |
 | Streamlit says the app is sleeping | Community Cloud paused an inactive app | Wake the app and allow it to restart. |
 | Import fails after repository changes | Old top-level module reference remains | Import through `job_match_agent.<module>` and rerun all tests. |
@@ -662,6 +708,8 @@ The current architecture was built incrementally:
    strengthened test isolation.
 7. **Repository organization:** moved shared modules into `job_match_agent/` and
    long-form guides into `docs/` while keeping all entry points stable.
+8. **Phase 6 document-input foundation:** added paste/upload selection, in-memory
+   PDF/DOCX/TXT extraction, editable previews, and 10,000-character limits.
 
 The stable `v3.0.0` release records the protected public OpenAI milestone. Later
 organization and documentation commits improve maintainability without changing
@@ -673,8 +721,10 @@ the core analysis contract.
   account.
 - The live workflow depends on Streamlit, Google, Supabase, and OpenAI
   availability.
-- The interface accepts pasted text rather than directly parsing PDF or Word
-  resumes.
+- Uploads support PDF, DOCX, and UTF-8 TXT only; legacy `.doc` and RTF are not
+  supported.
+- PDF text extraction is not OCR and may not preserve complex visual reading
+  order; scanned documents require conversion to searchable text.
 - One analysis handles one resume and one job description.
 - The benchmark currently covers one labeled fictional scenario.
 - Structural validation cannot independently verify every model judgment.
@@ -702,7 +752,7 @@ these technical invariants:
   server files.
 - Saved fictional content remains available without sign-in or API cost.
 - Private app access restrictions remain separate from public-app login.
-- The 49-test suite and benchmark remain green.
+- The 69-test suite and benchmark remain green.
 
 These boundaries allow the visual experience to improve without weakening the
 security, privacy, cost, or truthfulness controls already verified.

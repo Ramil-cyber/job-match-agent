@@ -755,7 +755,7 @@ def _draw_body_page(canvas, document) -> None:
         PAGE_WIDTH - RIGHT_MARGIN,
         0.43 * inch,
     )
-    canvas.drawString(LEFT_MARGIN, 0.25 * inch, "Verified September 12, 2026")
+    canvas.drawString(LEFT_MARGIN, 0.25 * inch, "Verified September 13, 2026")
     canvas.drawRightString(
         PAGE_WIDTH - RIGHT_MARGIN,
         0.25 * inch,
@@ -769,7 +769,7 @@ def _cover_story() -> list:
         [
             [
                 Paragraph("3 / 10 / 100", STYLES["cover_subtitle"]),
-                Paragraph("49 tests", STYLES["cover_subtitle"]),
+                Paragraph("69 tests", STYLES["cover_subtitle"]),
                 Paragraph("8/8 benchmark", STYLES["cover_subtitle"]),
             ],
             [
@@ -815,10 +815,10 @@ def _cover_story() -> list:
         facts,
         Spacer(1, 0.35 * inch),
         Paragraph(
-            "Architecture baseline: v3.0.0 and subsequent repository organization",
+            "Architecture baseline: v3.0.0 plus Phase 6 document input",
             STYLES["cover_meta"],
         ),
-        Paragraph("Last verified: September 12, 2026", STYLES["cover_meta"]),
+        Paragraph("Last verified: September 13, 2026", STYLES["cover_meta"]),
         PageBreak(),
     ]
 

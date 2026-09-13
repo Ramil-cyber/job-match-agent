@@ -46,6 +46,8 @@ class PublicAnalysisConfigTests(unittest.TestCase):
         self.assertEqual(config.user_limit, 3)
         self.assertEqual(config.daily_limit, 10)
         self.assertEqual(config.total_limit, 100)
+        self.assertEqual(config.max_resume_characters, 10_000)
+        self.assertEqual(config.max_job_characters, 10_000)
 
     def test_enabled_feature_reports_missing_secrets(self):
         config = load_public_analysis_config({"ENABLE_PUBLIC_OPENAI_ANALYSIS": "true"})
