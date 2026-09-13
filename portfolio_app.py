@@ -27,6 +27,7 @@ from job_match_agent.quality_benchmark import (
     extract_assessments,
 )
 from job_match_agent.report_validation import validate_job_match_report
+from job_match_agent.streamlit_inputs import render_document_input
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 SAMPLE_RESUME_PATH = PROJECT_ROOT / "examples" / "sample_resume.txt"
@@ -226,45 +227,52 @@ def render_live_analysis(config: PublicAnalysisConfig | None) -> None:
         return
 
     st.info(
-        "Privacy: Use fictional or redacted information. Submitted text is sent "
-        "to OpenAI for this analysis and is not saved by this app."
+        "Privacy: Use fictional or redacted information. Pasted text and text "
+        "extracted from uploads are sent to OpenAI for this analysis and are "
+        "not saved by this app."
     )
     st.caption(
         "Each submitted analysis reserves one account attempt before any API "
         "request. The attempt remains counted if processing later fails."
     )
 
-    with st.form("public_openai_job_match_form"):
-        resume_text = st.text_area(
+    with st.container(border=True):
+        resume_input = render_document_input(
             "Resume",
-            height=250,
-            max_chars=config.max_resume_characters,
-            placeholder="Paste a fictional or redacted resume here.",
+            key_prefix="public_resume",
+            max_characters=config.max_resume_characters,
+            paste_placeholder="Paste a fictional or redacted resume here.",
         )
-        job_description_text = st.text_area(
+        job_description_input = render_document_input(
             "Job Description",
-            height=250,
-            max_chars=config.max_job_characters,
-            placeholder="Paste the job description here.",
+            key_prefix="public_job_description",
+            max_characters=config.max_job_characters,
+            paste_placeholder="Paste the job description here.",
         )
         privacy_confirmed = st.checkbox(
             "I confirm that I removed sensitive personal information and "
-            "understand that the submitted text will be sent to OpenAI."
+            "understand that pasted text or uploaded document content will be "
+            "sent to OpenAI."
         )
-        submitted = st.form_submit_button(
+        submitted = st.button(
             "Analyze Match",
             type="primary",
             width="stretch",
+            key="public_analyze_match",
         )
 
     if submitted:
+        resume_text = resume_input.text
+        job_description_text = job_description_input.text
         validation_message = validate_public_inputs(
             resume=resume_text,
             job_description=job_description_text,
             config=config,
         )
 
-        if validation_message:
+        if resume_input.error or job_description_input.error:
+            st.error("Resolve the document upload error before analyzing.")
+        elif validation_message:
             st.error(validation_message)
         elif not privacy_confirmed:
             st.error("Please confirm the privacy notice before continuing.")
@@ -445,8 +453,9 @@ with about_tab:
 - **Saved example:** Displays a validated, pre-generated OpenAI report without
   sign-in or an API call.
 - **Guardrails:** Uses only resume evidence, separates matches from gaps, rejects
-  incomplete reports, constrains input and output size, performs safety screening,
-  and supports PDF and Markdown downloads.
+  incomplete reports, accepts pasted text or safe PDF/DOCX/TXT extraction,
+  constrains input and output size, performs safety screening, and supports PDF
+  and Markdown downloads.
         """
     )
     st.warning(

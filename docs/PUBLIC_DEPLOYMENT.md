@@ -24,14 +24,20 @@ OpenAI. The saved fictional report remains available without sign-in.
 | Attempts per verified account | 3 total |
 | Shared attempts | 10 per UTC day |
 | Public demonstration allowance | 100 total |
-| Resume length | 8,000 characters |
-| Job-description length | 8,000 characters |
+| Resume length | 10,000 characters |
+| Job-description length | 10,000 characters |
+| Uploaded file size | 5 MB per document |
 | Generation output | 3,000 tokens |
 | Agent turns | 1 |
 
 Attempts are reserved before an API request and remain counted when later
 processing fails. This prevents repeated provider or validation failures from
 bypassing the financial limits.
+
+An existing deployment may still contain the earlier explicit values of `8000`
+for `PUBLIC_MAX_RESUME_CHARACTERS` and `PUBLIC_MAX_JOB_CHARACTERS`. Update both
+Streamlit secrets to `10000`; the new code default does not override a value
+already saved in Community Cloud.
 
 ## 1. Prepare the Dedicated Quota Database
 
@@ -123,10 +129,12 @@ Use this order:
 6. Sign in with the owner's Google test account.
 7. Submit empty fields first and verify that validation rejects them without
    consuming an attempt or calling OpenAI.
-8. Run one fictional end-to-end analysis. This makes one paid generation call.
-9. Verify that the account allowance changes from `3/3` to `2/3`.
-10. Verify PDF and Markdown downloads and then inspect OpenAI and Supabase usage.
-11. Confirm that the automated limit-denial tests pass before publishing the
+8. Upload one fictional PDF, DOCX, or UTF-8 TXT file and confirm that editable
+   extracted text appears without consuming an attempt.
+9. Run one fictional end-to-end analysis. This makes one paid generation call.
+10. Verify that the account allowance changes from `3/3` to `2/3`.
+11. Verify PDF and Markdown downloads and then inspect OpenAI and Supabase usage.
+12. Confirm that the automated limit-denial tests pass before publishing the
     Google OAuth application.
 
 Only after these checks pass should Google sign-in be opened beyond the owner's
@@ -143,9 +151,9 @@ The quota database stores:
 - Counter update timestamps
 
 It does not store Google email addresses, names, resumes, job descriptions, or
-generated reports. Live documents and reports remain in the active Streamlit
-session only. Submitted text is still sent to OpenAI and is subject to OpenAI's
-API data-handling terms.
+generated reports. Uploaded files are processed in memory, and only their
+editable extracted text remains in the active Streamlit session. Submitted text
+is still sent to OpenAI and is subject to OpenAI's API data-handling terms.
 
 ## Emergency Stop
 
