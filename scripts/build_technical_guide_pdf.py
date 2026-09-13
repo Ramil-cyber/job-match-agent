@@ -499,8 +499,7 @@ def _is_separator_row(cells: list[str]) -> bool:
 
 def _markdown_table(lines: list[str]) -> LongTable:
     rows = [
-        [cell.strip() for cell in line.strip().strip("|").split("|")]
-        for line in lines
+        [cell.strip() for cell in line.strip().strip("|").split("|")] for line in lines
     ]
     rows = [row for row in rows if not _is_separator_row(row)]
     column_count = max(len(row) for row in rows)
@@ -540,11 +539,7 @@ def _is_special(line: str) -> bool:
     stripped = line.strip()
     return bool(
         not stripped
-        or stripped.startswith("#")
-        or stripped.startswith("```")
-        or stripped.startswith("|")
-        or stripped.startswith(">")
-        or stripped.startswith("![")
+        or stripped.startswith(("#", "```", "|", ">", "!["))
         or re.match(r"^(?:-|\d+\.)\s+", stripped)
     )
 
@@ -667,7 +662,13 @@ def _parse_markdown(lines: list[str]) -> list:
                 callout_lines.append(lines[index].strip().lstrip(">").strip())
                 index += 1
             callout = Table(
-                [[Paragraph(_inline_markdown(" ".join(callout_lines)), STYLES["callout"])]],
+                [
+                    [
+                        Paragraph(
+                            _inline_markdown(" ".join(callout_lines)), STYLES["callout"]
+                        )
+                    ]
+                ],
                 colWidths=[CONTENT_WIDTH],
                 hAlign="LEFT",
             )
@@ -717,7 +718,9 @@ def _draw_cover_page(canvas, document) -> None:
     canvas.setFillColor(BLUE)
     canvas.rect(0, PAGE_HEIGHT - 18, PAGE_WIDTH * 0.72, 18, fill=1, stroke=0)
     canvas.setFillColor(CORAL)
-    canvas.rect(PAGE_WIDTH * 0.72, PAGE_HEIGHT - 18, PAGE_WIDTH * 0.28, 18, fill=1, stroke=0)
+    canvas.rect(
+        PAGE_WIDTH * 0.72, PAGE_HEIGHT - 18, PAGE_WIDTH * 0.28, 18, fill=1, stroke=0
+    )
     canvas.setStrokeColor(colors.HexColor("#334155"))
     canvas.setLineWidth(0.7)
     canvas.line(LEFT_MARGIN, 0.9 * inch, PAGE_WIDTH - RIGHT_MARGIN, 0.9 * inch)
@@ -769,7 +772,7 @@ def _cover_story() -> list:
         [
             [
                 Paragraph("3 / 10 / 100", STYLES["cover_subtitle"]),
-                Paragraph("69 tests", STYLES["cover_subtitle"]),
+                Paragraph("75 tests", STYLES["cover_subtitle"]),
                 Paragraph("8/8 benchmark", STYLES["cover_subtitle"]),
             ],
             [
@@ -815,7 +818,7 @@ def _cover_story() -> list:
         facts,
         Spacer(1, 0.35 * inch),
         Paragraph(
-            "Architecture baseline: v3.0.0 plus Phase 6 document input",
+            "Architecture baseline: v3.0.0 plus Phase 6 document input and UI",
             STYLES["cover_meta"],
         ),
         Paragraph("Last verified: September 13, 2026", STYLES["cover_meta"]),

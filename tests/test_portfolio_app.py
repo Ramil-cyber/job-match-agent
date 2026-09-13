@@ -25,6 +25,12 @@ class PortfolioAppTests(unittest.TestCase):
 
     def test_public_portfolio_renders_without_exceptions(self):
         self.assertEqual(len(self.app.exception), 0)
+        self.assertTrue(
+            any(
+                "Match your experience." in element.value
+                for element in self.app.markdown
+            )
+        )
 
     def test_public_portfolio_has_openai_only_tabs(self):
         self.assertEqual(
