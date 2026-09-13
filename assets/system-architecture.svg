@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg
+  PUBLIC '-//W3C//DTD SVG 1.0//EN'
+  'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>
+<svg width="720" height="420" preserveAspectRatio="xMinYMin meet" viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" version="1.0" fill-rule="evenodd" xmlns:xlink="http://www.w3.org/1999/xlink">
+	<title>...</title>
+	<desc>...</desc>
+	<clipPath id="clip">
+		<rect x="0" y="0" width="720" height="420"/>
+	</clipPath>
+	<g id="group" transform="scale(1,-1) translate(0,-420)" style="clip-path: url(#clip)">
+		<g transform="">
+			<rect x="0" y="0" width="720" height="420" rx="12" ry="12" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(97%,98%,98%); fill-rule: evenodd;"/>
+			<text x="226.635" y="392" style="font-family: Helvetica-Bold; font-size: 15px;fill: rgb(4%,7%,12%); stroke:none;" transform="translate(0,784) scale(1,-1)">Job Match Agent system architecture</text>
+			<rect x="39.6" y="285.6" width="196.79999999999998" height="54.60000000000002" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(85%,91%,99%); fill-rule: evenodd;"/>
+			<text x="104.997" y="321.20000000000005" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(4%,7%,12%); stroke:none;" transform="translate(0,642) scale(1,-1)">Public portfolio</text>
+			<text x="104.2652" y="299.6" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,599) scale(1,-1)">Saved + protected live</text>
+			<rect x="261.6" y="285.6" width="196.79999999999995" height="54.60000000000002" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(85%,91%,99%); fill-rule: evenodd;"/>
+			<text x="324.486" y="321.20000000000005" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(4%,7%,12%); stroke:none;" transform="translate(0,642) scale(1,-1)">Private Streamlit</text>
+			<text x="320.3254" y="299.6" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,599) scale(1,-1)">Restricted owner workflow</text>
+			<rect x="483.6" y="285.6" width="196.79999999999995" height="54.60000000000002" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(85%,91%,99%); fill-rule: evenodd;"/>
+			<text x="550.995" y="321.20000000000005" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(4%,7%,12%); stroke:none;" transform="translate(0,642) scale(1,-1)">Command line</text>
+			<text x="554.4158" y="299.6" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,599) scale(1,-1)">Local file workflow</text>
+			<rect x="39.6" y="176.4" width="196.79999999999998" height="54.599999999999994" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(87%,94%,99%); fill-rule: evenodd;"/>
+			<text x="105.49199999999999" y="212.0" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(4%,7%,12%); stroke:none;" transform="translate(0,424) scale(1,-1)">Public controls</text>
+			<text x="111.3474" y="190.4" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,380) scale(1,-1)">Auth, input, quota</text>
+			<rect x="261.6" y="176.4" width="196.79999999999995" height="54.599999999999994" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(87%,94%,99%); fill-rule: evenodd;"/>
+			<text x="336.4965" y="212.0" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(4%,7%,12%); stroke:none;" transform="translate(0,424) scale(1,-1)">Agent core</text>
+			<text x="322.396" y="190.4" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,380) scale(1,-1)">Evidence-based analysis</text>
+			<rect x="483.6" y="176.4" width="196.79999999999995" height="54.599999999999994" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(87%,94%,99%); fill-rule: evenodd;"/>
+			<text x="548.25" y="212.0" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(4%,7%,12%); stroke:none;" transform="translate(0,424) scale(1,-1)">Output controls</text>
+			<text x="540.809" y="190.4" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,380) scale(1,-1)">Validation, PDF, Markdown</text>
+			<rect x="39.6" y="54.6" width="196.79999999999998" height="54.6" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(98%,90%,95%); fill-rule: evenodd;"/>
+			<text x="109.9965" y="90.2" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(62%,7%,22%); stroke:none;" transform="translate(0,180) scale(1,-1)">Google OIDC</text>
+			<text x="114.7576" y="68.6" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,137) scale(1,-1)">Verified identity</text>
+			<rect x="261.6" y="54.6" width="196.79999999999995" height="54.6" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(98%,90%,95%); fill-rule: evenodd;"/>
+			<text x="338.742" y="90.2" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(62%,7%,22%); stroke:none;" transform="translate(0,180) scale(1,-1)">Supabase</text>
+			<text x="326.1734" y="68.6" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,137) scale(1,-1)">Atomic quota counters</text>
+			<rect x="483.6" y="54.6" width="196.79999999999995" height="54.6" rx="8" ry="8" style="stroke: rgb(79%,83%,88%); stroke-linecap: butt; stroke-width: 1; fill: rgb(98%,90%,95%); fill-rule: evenodd;"/>
+			<text x="557.2455" y="90.2" style="font-family: Helvetica-Bold; font-size: 9px;fill: rgb(62%,7%,22%); stroke:none;" transform="translate(0,180) scale(1,-1)">OpenAI API</text>
+			<text x="545.0522" y="68.6" style="font-family: Helvetica; font-size: 6.8px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,137) scale(1,-1)">Moderation + generation</text>
+			<path d="M 138,285.6 L 138,231 Z" style="stroke: rgb(14%,38%,92%); stroke-linecap: butt; stroke-width: 1.5;"/>
+			<polygon points="138 231, 134 238, 142 238" style="stroke: rgb(14%,38%,92%); stroke-linecap: butt; stroke-width: 1; fill: rgb(14%,38%,92%); fill-rule: evenodd;"/>
+			<path d="M 360,285.6 L 360,231 Z" style="stroke: rgb(14%,38%,92%); stroke-linecap: butt; stroke-width: 1.5;"/>
+			<polygon points="360 231, 356 238, 364 238" style="stroke: rgb(14%,38%,92%); stroke-linecap: butt; stroke-width: 1; fill: rgb(14%,38%,92%); fill-rule: evenodd;"/>
+			<path d="M 582,285.6 L 582,231 Z" style="stroke: rgb(14%,38%,92%); stroke-linecap: butt; stroke-width: 1.5;"/>
+			<polygon points="582 231, 578 238, 586 238" style="stroke: rgb(14%,38%,92%); stroke-linecap: butt; stroke-width: 1; fill: rgb(14%,38%,92%); fill-rule: evenodd;"/>
+			<path d="M 138,176.4 L 138,109.2 Z" style="stroke: rgb(3%,56%,69%); stroke-linecap: butt; stroke-width: 1.5;"/>
+			<polygon points="138 109.2, 134 116.2, 142 116.2" style="stroke: rgb(3%,56%,69%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,56%,69%); fill-rule: evenodd;"/>
+			<path d="M 187.2,176.4 L 310.8,109.2 Z" style="stroke: rgb(3%,56%,69%); stroke-linecap: butt; stroke-width: 1.5;"/>
+			<polygon points="310.8 109.2, 303.8 105.2, 303.8 113.2" style="stroke: rgb(3%,56%,69%); stroke-linecap: butt; stroke-width: 1; fill: rgb(3%,56%,69%); fill-rule: evenodd;"/>
+			<path d="M 409.2,176.4 L 532.8,109.2 Z" style="stroke: rgb(88%,11%,28%); stroke-linecap: butt; stroke-width: 1.5;"/>
+			<polygon points="532.8 109.2, 525.8 105.2, 525.8 113.2" style="stroke: rgb(88%,11%,28%); stroke-linecap: butt; stroke-width: 1; fill: rgb(88%,11%,28%); fill-rule: evenodd;"/>
+			<path d="M 458.4,203.7 L 483.6,203.7 Z" style="stroke: rgb(14%,38%,92%); stroke-linecap: butt; stroke-width: 1.5;"/>
+			<polygon points="483.6 203.7, 476.6 199.7, 476.6 207.7" style="stroke: rgb(14%,38%,92%); stroke-linecap: butt; stroke-width: 1; fill: rgb(14%,38%,92%); fill-rule: evenodd;"/>
+			<text x="236.75039999999998" y="23.1" style="font-family: Helvetica; font-size: 7.2px;fill: rgb(39%,45%,54%); stroke:none;" transform="translate(0,46) scale(1,-1)">Secrets remain server-side; public failures stop before unmetered generation.</text>
+		</g>
+	</g>
+</svg>
