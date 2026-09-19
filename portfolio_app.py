@@ -278,7 +278,7 @@ def render_live_analysis(config: PublicAnalysisConfig | None) -> None:
             "Resume",
             key_prefix="public_resume",
             max_characters=config.max_resume_characters,
-            paste_placeholder="Paste a fictional or redacted resume here.",
+            paste_placeholder="Paste a resume here.",
         )
 
     with job_column, st.container(border=True):
